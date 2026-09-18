@@ -1,0 +1,73 @@
+/* ==========================================================================
+   VARIABLES CSS - Super Gol
+   ========================================================================== */
+
+:root {
+  /* Colors */
+  --color-primary: #c8ff00;
+  --color-primary-dark: #111312;
+  --color-accent-yellow: #c8ff00;
+  --color-accent-orange: #e76f51;
+  
+  --color-success: #9bc900;
+  --color-warning: #d98e2b;
+  --color-danger: #d94f4f;
+  --color-info: #3c7fa3;
+  
+  --color-white: #f4f5f1;
+  --color-gray-50: #242624;
+  --color-gray-100: #E9ECEF;
+  --color-gray-200: #DEE2E6;
+  --color-gray-300: #CED4DA;
+  --color-gray-500: #6C757D;
+  --color-gray-700: #b5b8b2;
+  --color-gray-900: #f4f5f1;
+
+  /* Typography */
+  --font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+  
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  /* Borders & Shadows */
+  --border-radius-sm: 4px;
+  --border-radius: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-full: 50%;
+  
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.24);
+  --shadow-md: 0 8px 22px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 18px 45px rgba(0, 0, 0, 0.4);
+  
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  
+  /* Layout */
+  --sidebar-width: 220px;
+  --container-max-width: 1200px;
+  
+  /* Z-Index */
+  --z-overlay: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+  --z-sidebar: 50;
+}

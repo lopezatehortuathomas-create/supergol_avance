@@ -1,0 +1,3 @@
+// Configuración de Supabase — reemplazar con tus credenciales
+export const SUPABASE_URL = 'https://rfnrxnpyukwdancuikfj.supabase.co';
+export const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmbnJ4bnB5dWt3ZGFuY3Vpa2ZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1NTIwNTQsImV4cCI6MjEwNDEyODA1NH0.DKPPHaX2N2pV0xU7pBy0MoueLwt6uBuEof-VHvPRXZw';

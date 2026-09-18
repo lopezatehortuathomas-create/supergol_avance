@@ -1,0 +1,204 @@
+/* ==========================================================================
+   LAYOUT CSS - Super Gol
+   ========================================================================== */
+
+body {
+  font-family: var(--font-family);
+  color: var(--color-gray-900);
+  background: #151715;
+  min-height: 100vh;
+}
+
+#sidebar-container {
+  display: contents;
+}
+
+.app-layout {
+  display: flex;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Sidebar */
+.sidebar {
+  width: var(--sidebar-width);
+  background: #101110;
+  color: var(--color-white);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  transition: transform var(--transition-fast);
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+  z-index: var(--z-sidebar);
+}
+
+.sidebar__logo {
+  padding: var(--space-lg);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-bold);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.sidebar__nav {
+  padding: var(--space-md) 0;
+  flex-grow: 1;
+}
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-lg);
+  color: var(--color-gray-200);
+  text-decoration: none;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.sidebar__link:hover, .sidebar__link.active {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+/* Main Content */
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Prevents overflow in flex children */
+  min-height: 100vh;
+  background: #151715;
+  padding-left: 0;
+}
+
+body:has(.sidebar) .main-content {
+  margin-left: var(--sidebar-width);
+}
+
+/* Top Bar */
+.top-bar {
+  background-color: #101110;
+  padding: var(--space-md) var(--space-lg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.mobile-menu-toggle,
+.mobile-menu-close {
+  border: 0;
+  cursor: pointer;
+}
+
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: calc(var(--z-sidebar) + 1);
+  background: var(--color-primary-dark);
+  color: var(--color-white);
+  border-radius: var(--border-radius);
+  padding: 0.65rem 0.75rem;
+  box-shadow: var(--shadow-md);
+}
+
+.top-bar__menu-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: var(--text-xl);
+  cursor: pointer;
+  padding: var(--space-xs);
+}
+
+/* Page Header */
+.page-header {
+  padding: var(--space-lg) var(--space-lg) 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.page-header__title {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-dark);
+}
+
+.container {
+  padding: var(--space-lg);
+  width: 100%;
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+}
+
+/* Grid Utilities */
+.grid-2, .grid-3, .grid-4 {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+.grid-4 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+
+/* Mobile Overlay */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0,0,0,0.5);
+  z-index: calc(var(--z-sidebar) - 1);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    transform: translateX(-100%);
+  }
+
+  body:has(.sidebar) .main-content {
+    margin-left: 0;
+  }
+
+  .mobile-menu-toggle {
+    display: block;
+  }
+  
+  .sidebar.sidebar--open {
+    transform: translateX(0);
+  }
+
+  .sidebar.sidebar--open .mobile-menu-close {
+    display: block;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+  }
+  
+  .sidebar-overlay.active {
+    display: block;
+  }
+  
+  .top-bar__menu-btn {
+    display: block;
+  }
+
+  .page-container {
+    padding: 5rem 1rem 2rem;
+  }
+}

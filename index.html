@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Super Gol</title>
+  
+  <!-- Enlaces CSS (asumiendo que existirán) -->
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/pages.css">
+  
+  <!-- Favicon (opcional) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚽</text></svg>">
+</head>
+<body>
+  <!-- Contenedor del Navbar/Sidebar (vacío por defecto, llenado por JS) -->
+  <div id="sidebar-container"></div>
+  
+  <!-- Contenido Principal -->
+  <div class="main-content">
+    <div id="app"></div>
+  </div>
+  
+  <!-- Contenedor de Notificaciones (Toasts) -->
+  <div id="toast-container" class="toast-container"></div>
+  
+  <!-- Contenedor de Modales -->
+  <div id="modal-container"></div>
+  
+  <!-- Overlay de Carga -->
+  <div id="loader" class="loader--overlay" style="display:none">
+    <div class="loader"></div>
+  </div>
+
+  <!-- Entry point JS -->
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
