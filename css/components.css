@@ -182,14 +182,27 @@
 
 /* Toasts */
 .toast-container { position: fixed; bottom: var(--space-lg); right: var(--space-lg); z-index: var(--z-toast); display: flex; flex-direction: column; gap: var(--space-sm); }
-.toast { padding: var(--space-md) var(--space-lg); border-radius: var(--border-radius); color: var(--color-white); box-shadow: var(--shadow-md); animation: slideIn 0.3s ease-out forwards; min-width: 250px; display: flex; justify-content: space-between; align-items: center; }
+.toast {
+  padding: var(--space-md) var(--space-lg);
+  border-radius: var(--border-radius);
+  color: var(--color-white);
+  box-shadow: var(--shadow-md);
+  min-width: 250px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 0;
+  transform: translateX(24px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.toast--show { opacity: 1; transform: translateX(0); }
 .toast--success { background-color: var(--color-success); }
 .toast--error { background-color: var(--color-danger); }
 .toast--warning { background-color: var(--color-warning); color: var(--color-gray-900); }
 .toast--info { background-color: var(--color-info); }
 @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-@keyframes fadeOut { to { opacity: 0; } }
-.toast.fade-out { animation: fadeOut 0.3s forwards; }
+@keyframes fadeOut { to { opacity: 0; transform: translateX(24px); } }
+.toast.fade-out { animation: fadeOut 0.25s ease forwards; }
 
 /* Loader */
 .loader { border: 3px solid var(--color-gray-200); border-top: 3px solid var(--color-primary); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }

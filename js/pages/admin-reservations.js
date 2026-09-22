@@ -58,18 +58,26 @@ export async function init() {
   await loadReservations();
 
   // Setup Realtime
+  if (realtimeChannel) {
+    supabase.removeChannel(realtimeChannel);
+  }
+
   realtimeChannel = supabase
     .channel('admin-reservations-updates')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'reservations' }, payload => {
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'reservations' }, () => {
       loadReservations();
     })
     .subscribe();
 
-  window.addEventListener('hashchange', () => {
-    if (!window.location.hash.includes('admin-reservations')) {
-      if (realtimeChannel) supabase.removeChannel(realtimeChannel);
+  const cleanupRealtime = () => {
+    if (window.location.hash.includes('admin/reservas')) return;
+    if (realtimeChannel) {
+      supabase.removeChannel(realtimeChannel);
+      realtimeChannel = null;
     }
-  }, { once: true });
+  };
+
+  window.addEventListener('hashchange', cleanupRealtime, { passive: true });
 }
 
 async function loadReservations() {
@@ -80,7 +88,7 @@ async function loadReservations() {
 
     let query = supabase
       .from('reservations')
-      .select('*, spaces(name, type), profiles:user_id(full_name, phone)')
+      .select('*, spaces(name, type)')
       .order('start_time', { ascending: false });
 
     if (statusFilter !== 'all') {
@@ -90,8 +98,24 @@ async function loadReservations() {
     const { data, error } = await query;
     if (error) throw error;
 
+    const userIds = [...new Set((data || []).map(r => r.user_id).filter(Boolean))];
+    const profileMap = {};
+
+    if (userIds.length) {
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, full_name, phone')
+        .in('id', userIds);
+
+      if (profilesError) throw profilesError;
+
+      (profilesData || []).forEach(profile => {
+        profileMap[profile.id] = profile;
+      });
+    }
+
     const tbody = document.querySelector('#admin-reservations-table tbody');
-    
+
     let filteredData = data;
     if (typeFilter !== 'all') {
       filteredData = data.filter(r => r.spaces && r.spaces.type === typeFilter);
@@ -106,10 +130,11 @@ async function loadReservations() {
     filteredData.forEach(res => {
       const spaceName = res.spaces ? res.spaces.name : 'N/A';
       const spaceType = res.spaces ? res.spaces.type : 'N/A';
-      const userName = res.profiles ? res.profiles.full_name : 'N/A';
-      const userPhone = res.profiles ? res.profiles.phone : 'N/A';
+      const profile = profileMap[res.user_id] || {};
+      const userName = profile.full_name || 'N/A';
+      const userPhone = profile.phone || 'N/A';
       const timeStr = `${formatDate(new Date(res.start_time))} - ${new Date(res.end_time).getHours()}:00`;
-      
+
       let actionsHtml = '';
       if (res.status === 'pendiente') {
         actionsHtml += `<button class="btn btn--sm btn--success" data-action="update-status" data-status="aprobada" data-id="${res.id}">Aprobar</button> `;
@@ -136,8 +161,9 @@ async function loadReservations() {
     bindTableActions();
 
   } catch (error) {
-    showToast('Error al cargar reservas', 'error');
-    console.error(error);
+    const message = error?.message || 'No se pudo cargar la lista de reservas.';
+    showToast(`Error al cargar reservas: ${message}`, 'error');
+    console.error('Error al cargar reservas:', error);
   } finally {
     setLoading(false);
   }

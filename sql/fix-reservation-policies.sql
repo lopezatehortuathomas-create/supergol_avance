@@ -3,10 +3,25 @@
 
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS boolean
-LANGUAGE sql STABLE
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
 AS $$
   SELECT COALESCE(
-    (auth.jwt() -> 'app_metadata' ->> 'user_role') IN ('admin', 'superadmin'),
+    (
+      COALESCE(
+        auth.jwt() -> 'app_metadata' ->> 'user_role',
+        auth.jwt() -> 'app_metadata' ->> 'role',
+        auth.jwt() -> 'app_metadata' ->> 'userRole'
+      ) IN ('admin', 'superadmin')
+      OR EXISTS (
+        SELECT 1
+        FROM public.profiles p
+        WHERE p.id = auth.uid()
+          AND p.role IN ('admin', 'superadmin')
+      )
+    ),
     false
   );
 $$;

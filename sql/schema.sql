@@ -8,10 +8,25 @@ CREATE EXTENSION IF NOT EXISTS "btree_gist";
 -- ==============================================================================
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS boolean
-LANGUAGE sql STABLE
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
 AS $$
   SELECT COALESCE(
-    (auth.jwt() -> 'app_metadata' ->> 'user_role') IN ('admin', 'superadmin'),
+    (
+      COALESCE(
+        auth.jwt() -> 'app_metadata' ->> 'user_role',
+        auth.jwt() -> 'app_metadata' ->> 'role',
+        auth.jwt() -> 'app_metadata' ->> 'userRole'
+      ) IN ('admin', 'superadmin')
+      OR EXISTS (
+        SELECT 1
+        FROM public.profiles p
+        WHERE p.id = auth.uid()
+          AND p.role IN ('admin', 'superadmin')
+      )
+    ),
     false
   );
 $$;
@@ -25,7 +40,7 @@ CREATE TABLE public.profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   full_name TEXT NOT NULL,
   phone TEXT,
-  role TEXT NOT NULL DEFAULT 'usuario' CHECK (role IN ('admin', 'usuario')),
+  role TEXT NOT NULL DEFAULT 'usuario' CHECK (role IN ('admin', 'superadmin', 'usuario')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -283,5 +298,5 @@ INSERT INTO public.products (name, category, price, stock, min_stock) VALUES
 -- 9. ADMIN PROMOTION (COMMENTED)
 -- ==============================================================================
 -- Para promover un usuario a admin, ejecutar en el SQL Editor de Supabase:
--- UPDATE auth.users SET raw_app_meta_data = raw_app_meta_data || '{"user_role": "admin"}'::jsonb WHERE email = 'admin@example.com';
--- UPDATE public.profiles SET role = 'admin' WHERE id = (SELECT id FROM auth.users WHERE email = 'admin@example.com');
+-- UPDATE auth.users SET raw_app_meta_data = raw_app_meta_data || '{"user_role": "superadmin"}'::jsonb WHERE email = 'admin@example.com';
+-- UPDATE public.profiles SET role = 'superadmin' WHERE id = (SELECT id FROM auth.users WHERE email = 'admin@example.com');

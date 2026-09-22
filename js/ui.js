@@ -11,16 +11,17 @@ export function showToast(message, type = 'success', duration = 3000) {
   const toast = document.createElement('div');
   toast.className = `toast toast--${type}`;
   toast.innerText = message;
-  
+
   container.appendChild(toast);
 
-  // Animación de entrada (asumiendo CSS para ello)
   requestAnimationFrame(() => {
     toast.classList.add('toast--show');
   });
 
   setTimeout(() => {
-    toast.remove();
+    toast.classList.remove('toast--show');
+    toast.classList.add('fade-out');
+    setTimeout(() => toast.remove(), 250);
   }, duration);
 }
 
@@ -109,11 +110,18 @@ export function closeModal() {
   }
 }
 
-// Controla el overlay de carga
-export function setLoading(isLoading) {
+// Controla el overlay de carga y opcionalmente deshabilita un elemento
+export function setLoading(targetOrLoading, maybeTarget = null) {
+  const isLoading = typeof targetOrLoading === 'boolean' ? targetOrLoading : Boolean(maybeTarget);
+  const target = typeof targetOrLoading === 'boolean' ? maybeTarget : targetOrLoading;
+
   const loader = document.getElementById('loader');
   if (loader) {
     loader.style.display = isLoading ? 'flex' : 'none';
+  }
+
+  if (target && typeof target === 'object' && 'disabled' in target) {
+    target.disabled = isLoading;
   }
 }
 

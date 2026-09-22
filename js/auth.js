@@ -56,12 +56,19 @@ export async function getCurrentUser() {
       .eq('id', user.id)
       .maybeSingle();
 
-    if (profile?.role) {
+    const profileRole = profile?.role || user?.app_metadata?.user_role || user?.app_metadata?.role || user?.user_metadata?.role;
+    if (profileRole) {
       return {
         ...user,
+        app_metadata: {
+          ...user.app_metadata,
+          user_role: profileRole,
+          role: profileRole
+        },
         user_metadata: {
           ...user.user_metadata,
-          role: profile.role
+          user_role: profileRole,
+          role: profileRole
         }
       };
     }
@@ -85,9 +92,17 @@ export async function getSession() {
 
 export function isAdmin(user) {
   if (!user) return false;
-  const appRole = user?.app_metadata?.user_role?.toLowerCase();
-  const userRole = user?.user_metadata?.role?.toLowerCase();
-  return appRole === 'admin' || appRole === 'superadmin' || userRole === 'admin' || userRole === 'superadmin';
+
+  const role = [
+    user?.app_metadata?.user_role,
+    user?.app_metadata?.role,
+    user?.user_metadata?.user_role,
+    user?.user_metadata?.role,
+    user?.role,
+    user?.profile?.role
+  ].find(value => Boolean(value))?.toString().toLowerCase();
+
+  return role === 'admin' || role === 'superadmin';
 }
 
 export function onAuthStateChange(callback) {
