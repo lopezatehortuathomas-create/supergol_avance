@@ -74,6 +74,8 @@ CREATE TABLE public.usage_logs (
   id SERIAL PRIMARY KEY,
   space_id INT NOT NULL REFERENCES public.spaces(id),
   reservation_id INT REFERENCES public.reservations(id),
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
   registered_by UUID NOT NULL REFERENCES auth.users(id),
   used_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   duration_min INT,
