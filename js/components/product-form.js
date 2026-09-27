@@ -17,7 +17,7 @@ export function renderProductForm(product = null) {
             </div>
             <div class="form-group">
                 <label class="form-label" for="product-price">Precio ($)</label>
-                <input type="number" id="product-price" class="form-input" required min="0" step="100"
+                <input type="number" id="product-price" class="form-input" required min="0" step="0.01"
                        value="${product ? product.price : ''}">
             </div>
             <div class="grid grid-cols-2 gap-4">

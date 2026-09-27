@@ -1,6 +1,6 @@
 import { supabase } from '../supabase.js';
 import { getCurrentUser, isAdmin } from '../auth.js';
-import { showToast, setLoading, formatCurrency } from '../ui.js';
+import { showToast, setLoading, formatCurrency, getLocalDateString, getLocalDateRange } from '../ui.js';
 import { navigateTo } from '../router.js';
 import { renderBarChart, destroyChart } from '../components/chart.js';
 
@@ -88,8 +88,8 @@ export async function init() {
         const start = new Date();
         start.setDate(end.getDate() - 30);
 
-        document.getElementById('report-start').value = start.toISOString().split('T')[0];
-        document.getElementById('report-end').value = end.toISOString().split('T')[0];
+        document.getElementById('report-start').value = getLocalDateString(start);
+        document.getElementById('report-end').value = getLocalDateString(end);
 
         document.getElementById('btn-generate-report').addEventListener('click', generateReports);
 
@@ -103,12 +103,14 @@ export async function init() {
 async function generateReports() {
     try {
         setLoading(true);
-        const start = document.getElementById('report-start').value + 'T00:00:00Z';
-        const end = document.getElementById('report-end').value + 'T23:59:59Z';
+        const startDate = document.getElementById('report-start').value;
+        const endDate = document.getElementById('report-end').value;
+        const { start: startIso, end: endIso } = getLocalDateRange(startDate);
+        const { start: endStartIso, end: endEndIso } = getLocalDateRange(endDate);
 
         await Promise.all([
-            generateSalesReports(start, end),
-            generateReservationsReport(start, end)
+            generateSalesReports(startIso, endEndIso),
+            generateReservationsReport(startIso, endEndIso)
         ]);
 
     } catch (error) {
@@ -136,24 +138,39 @@ async function generateSalesReports(start, end) {
     const saleIds = sales.map(s => s.id);
     const { data: items, error: itemsError } = await supabase
         .from('sale_items')
-        .select('quantity, unit_price, subtotal, product_id, products(name, category)')
+        .select('quantity, unit_price, subtotal, product_id')
         .in('sale_id', saleIds);
 
     if (itemsError) throw itemsError;
+
+    const productIds = [...new Set((items || []).map(item => item.product_id).filter(Boolean))];
+    let productLookup = {};
+
+    if (productIds.length > 0) {
+        const { data: productRows, error: productError } = await supabase
+            .from('products')
+            .select('id, name, category')
+            .in('id', productIds);
+
+        if (productError) throw productError;
+        productLookup = Object.fromEntries((productRows || []).map(product => [String(product.id), product]));
+    }
 
     // Aggregate data
     const productStats = {};
     let totalQty = 0;
     let totalRev = 0;
 
-    items.forEach(item => {
+    (items || []).forEach(item => {
         totalQty += item.quantity;
         totalRev += Number(item.subtotal);
-        const pId = item.product_id;
+        const pId = String(item.product_id);
+        const product = productLookup[pId] || { name: 'Desconocido', category: 'N/A' };
+
         if (!productStats[pId]) {
             productStats[pId] = {
-                name: item.products?.name || 'Desconocido',
-                category: item.products?.category || 'N/A',
+                name: product.name,
+                category: product.category,
                 quantity: 0,
                 revenue: 0
             };

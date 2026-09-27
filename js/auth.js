@@ -56,7 +56,17 @@ export async function getCurrentUser() {
       .eq('id', user.id)
       .maybeSingle();
 
-    const profileRole = profile?.role || user?.app_metadata?.user_role || user?.app_metadata?.role || user?.user_metadata?.role;
+    const roleCandidates = [
+      profile?.role,
+      user?.app_metadata?.user_role,
+      user?.app_metadata?.role,
+      user?.user_metadata?.user_role,
+      user?.user_metadata?.role,
+      user?.role,
+      user?.profile?.role
+    ];
+
+    const profileRole = roleCandidates.find(value => Boolean(value))?.toString().toLowerCase();
     if (profileRole) {
       return {
         ...user,

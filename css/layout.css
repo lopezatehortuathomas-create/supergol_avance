@@ -132,6 +132,13 @@ body:has(.sidebar) .main-content {
   gap: var(--space-md);
 }
 
+.page-header h2 {
+  font-size: clamp(2.1rem, 3vw, 3rem);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-white);
+  margin: 0;
+}
+
 .page-header__title {
   font-size: var(--text-2xl);
   font-weight: var(--font-weight-bold);

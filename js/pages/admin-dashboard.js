@@ -69,13 +69,27 @@ async function loadTopProducts() {
   try {
     const { data, error } = await supabase
       .from('sale_items')
-      .select('quantity, products(name)');
+      .select('product_id, quantity');
 
     if (error) throw error;
 
+    const productIds = [...new Set((data || []).map(item => item.product_id).filter(Boolean))];
+    const productLookup = {};
+
+    if (productIds.length > 0) {
+      const { data: productsData, error: productsError } = await supabase
+        .from('products')
+        .select('id, name')
+        .in('id', productIds);
+
+      if (productsError) throw productsError;
+
+      Object.assign(productLookup, Object.fromEntries((productsData || []).map(product => [String(product.id), product.name])));
+    }
+
     const totals = {};
     for (const item of data || []) {
-      const productName = item.products?.name || 'Sin nombre';
+      const productName = productLookup[String(item.product_id)] || 'Sin nombre';
       totals[productName] = (totals[productName] || 0) + Number(item.quantity || 0);
     }
 

@@ -1,6 +1,6 @@
 import { supabase } from '../supabase.js';
 import { getCurrentUser, isAdmin } from '../auth.js';
-import { showToast, showModal, showConfirm, setLoading, formatDate, formatCurrency, renderBadge, escapeHtml, closeModal } from '../ui.js';
+import { showToast, showModal, showConfirm, setLoading, formatDate, formatCurrency, renderBadge, escapeHtml, closeModal, getLocalDateString, getLocalDateRange } from '../ui.js';
 import { navigateTo } from '../router.js';
 import { renderProductForm, getProductFormData } from '../components/product-form.js';
 import { renderCartItem, renderCartSummary } from '../components/sale-form.js';
@@ -9,16 +9,15 @@ let products = [];
 let cart = [];
 let currentTab = 'inventory';
 
+function findProductById(id) {
+    return products.find(product => String(product.id) === String(id));
+}
+
 export function render() {
     return `
         <div class="page-container">
             <header class="page-header flex justify-between items-center mb-4">
-                <h2>Inventario y Ventas</h2>
-                <div class="tabs">
-                    <button class="tab tab--active" data-tab="inventory">Inventario</button>
-                    <button class="tab" data-tab="pos">Nueva Venta</button>
-                    <button class="tab" data-tab="history">Historial de Ventas</button>
-                </div>
+                <h2>Inventario</h2>
             </header>
 
             <div id="low-stock-alert" class="alert alert--warning hidden mb-4">
@@ -69,6 +68,23 @@ export function render() {
                             <div class="card__header">
                                 <h3>Carrito</h3>
                             </div>
+                            <div id="cart-daily-summary" class="p-3 border-b border-gray-700 bg-gray-800/60">
+                                <div class="text-xs uppercase tracking-wide text-gray-400 mb-2">Resumen del día</div>
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <div class="bg-gray-900/70 rounded p-2">
+                                        <div class="text-gray-400">Productos</div>
+                                        <div id="cart-day-products" class="font-bold text-white">0</div>
+                                    </div>
+                                    <div class="bg-gray-900/70 rounded p-2">
+                                        <div class="text-gray-400">Unidades</div>
+                                        <div id="cart-day-qty" class="font-bold text-white">0</div>
+                                    </div>
+                                    <div class="bg-gray-900/70 rounded p-2 col-span-2">
+                                        <div class="text-gray-400">Recaudado</div>
+                                        <div id="cart-day-total" class="font-bold text-green-400">$0.00</div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="card__body flex-1 overflow-y-auto p-0">
                                 <div id="cart-items" class="divide-y">
                                     <div class="p-4 text-center text-gray-500">Agrega productos al carrito</div>
@@ -100,6 +116,7 @@ export function render() {
                                         <th>ID</th>
                                         <th>Fecha</th>
                                         <th>Vendido por</th>
+                                        <th>Productos</th>
                                         <th>Total</th>
                                         <th>Detalle</th>
                                     </tr>
@@ -123,7 +140,7 @@ export async function init() {
             return;
         }
 
-        document.getElementById('history-date').value = new Date().toISOString().split('T')[0];
+        document.getElementById('history-date').value = getLocalDateString();
 
         await loadProducts();
         checkLowStock();
@@ -136,12 +153,14 @@ export async function init() {
         document.getElementById('btn-add-product').addEventListener('click', showAddProductModal);
         document.getElementById('inventory-search').addEventListener('input', renderInventoryGrid);
         document.getElementById('inventory-category-filter').addEventListener('change', renderInventoryGrid);
-        
+        document.addEventListener('click', handleInventoryActionClick);
         document.getElementById('history-date').addEventListener('change', loadSalesHistory);
 
         // Initial setup
         renderInventoryGrid();
         renderPosGrid();
+        await loadDailySalesSummary();
+        await loadSalesHistory();
         updateCartUI();
         
     } catch (error) {
@@ -190,10 +209,33 @@ function checkLowStock() {
     }
 }
 
+async function getProductNameLookup(productIds) {
+    if (!productIds || productIds.length === 0) return {};
+
+    const uniqueIds = [...new Set(productIds.filter(Boolean))];
+    if (uniqueIds.length === 0) return {};
+
+    const { data, error } = await supabase
+        .from('products')
+        .select('id, name')
+        .in('id', uniqueIds);
+
+    if (error) throw error;
+
+    return Object.fromEntries((data || []).map(product => [String(product.id), product.name]));
+}
+
 function renderInventoryGrid() {
     const search = document.getElementById('inventory-search').value.toLowerCase();
     const category = document.getElementById('inventory-category-filter').value;
     const grid = document.getElementById('inventory-grid');
+
+    const orderedCategories = [
+        { key: 'refresco', label: 'Bebidas' },
+        { key: 'mekato', label: 'Mekato' },
+        { key: 'cerveza', label: 'Cerveza' },
+        { key: 'otro', label: 'Otros' }
+    ];
 
     const filtered = products.filter(p => {
         const matchesSearch = p.name.toLowerCase().includes(search);
@@ -206,33 +248,78 @@ function renderInventoryGrid() {
         return;
     }
 
-    grid.innerHTML = filtered.map(p => {
-        let stockClass = 'bg-green-100 text-green-800';
-        let cardClass = '';
-        if (p.stock <= p.min_stock) {
-            stockClass = 'bg-red-100 text-red-800';
-            cardClass = 'border-l-4 border-red-500';
-        } else if (p.stock <= p.min_stock * 2) {
-            stockClass = 'bg-orange-100 text-orange-800';
-        }
+    const grouped = orderedCategories.map(section => {
+        const items = filtered.filter(p => p.category === section.key);
+        return { ...section, items };
+    });
 
-        return `
-            <div class="card p-4 flex flex-col ${cardClass}">
-                <div class="flex justify-between items-start mb-2">
-                    <h4 class="font-bold truncate" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</h4>
-                    <span class="badge bg-gray-200 text-xs">${escapeHtml(p.category)}</span>
-                </div>
-                <div class="text-xl font-bold text-green-700 mb-2">${formatCurrency(p.price)}</div>
-                <div class="mt-auto flex justify-between items-center">
-                    <span class="badge ${stockClass}">Stock: ${p.stock}</span>
-                    <div class="flex gap-1">
-                        <button class="btn btn--sm" onclick="window.editProduct('${p.id}')">✏️</button>
-                        <button class="btn btn--sm btn--danger" onclick="window.deleteProduct('${p.id}')">🗑️</button>
+    const visibleGroups = grouped.filter(section => section.items.length > 0);
+
+    if (visibleGroups.length === 0) {
+        grid.innerHTML = '<div class="col-span-full text-center py-8 text-gray-500">No se encontraron productos</div>';
+        return;
+    }
+
+    grid.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 col-span-full w-full">
+            ${visibleGroups.map(section => {
+                const itemsHtml = section.items.map(p => {
+                    let stockClass = 'bg-green-100 text-green-800';
+                    let cardClass = '';
+                    if (p.stock <= p.min_stock) {
+                        stockClass = 'bg-red-100 text-red-800';
+                        cardClass = 'border-l-4 border-red-500';
+                    } else if (p.stock <= p.min_stock * 2) {
+                        stockClass = 'bg-orange-100 text-orange-800';
+                    }
+
+                    return `
+                        <div class="card p-3 flex flex-col ${cardClass}">
+                            <div class="flex justify-between items-center gap-2 mb-2">
+                                <h4 class="font-bold text-sm truncate" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</h4>
+                            </div>
+                            <div class="text-lg font-bold text-green-700 mb-2">${formatCurrency(p.price)}</div>
+                            <div class="mt-auto flex justify-between items-center gap-2">
+                                <span class="badge ${stockClass}">Stock: ${p.stock}</span>
+                                <div class="flex gap-2 inventory-actions">
+                                    <button type="button" class="btn btn--sm edit-product-btn" data-product-id="${p.id}" aria-label="Editar producto">✏️ Editar</button>
+                                    <button type="button" class="btn btn--sm delete-product-btn" data-product-id="${p.id}" aria-label="Eliminar producto">🗑️ Borrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                return `
+                    <div class="card p-3">
+                        <div class="card__header px-0 pt-0 pb-3 mb-2 border-b border-gray-700">
+                            <h3 class="text-lg font-bold text-white">${section.label}</h3>
+                        </div>
+                        <div class="space-y-3">
+                            ${itemsHtml}
+                        </div>
                     </div>
-                </div>
-            </div>
-        `;
-    }).join('');
+                `;
+            }).join('')}
+        </div>
+    `;
+}
+
+function handleInventoryActionClick(event) {
+    const editButton = event.target.closest('.edit-product-btn');
+    if (editButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        window.editProduct(editButton.dataset.productId);
+        return;
+    }
+
+    const deleteButton = event.target.closest('.delete-product-btn');
+    if (deleteButton) {
+        event.preventDefault();
+        event.stopPropagation();
+        window.deleteProduct(deleteButton.dataset.productId);
+    }
 }
 
 function showAddProductModal() {
@@ -260,7 +347,7 @@ function showAddProductModal() {
 }
 
 window.editProduct = async (id) => {
-    const product = products.find(p => p.id === id);
+    const product = findProductById(id);
     if (!product) return;
 
     showModal('Editar Producto', renderProductForm(product), async () => {
@@ -305,23 +392,53 @@ window.deleteProduct = (id) => {
 // --- POS Section ---
 function renderPosGrid() {
     const grid = document.getElementById('pos-grid');
-    grid.innerHTML = products.filter(p => p.stock > 0).map(p => `
-        <div class="card p-3 cursor-pointer hover:shadow-lg transition-shadow border ${p.stock <= p.min_stock ? 'border-red-300' : 'border-transparent'}" 
-             onclick="window.addToCart('${p.id}')">
-            <h5 class="font-bold truncate text-sm">${escapeHtml(p.name)}</h5>
-            <div class="flex justify-between items-center mt-2">
-                <span class="text-green-700 font-bold">${formatCurrency(p.price)}</span>
-                <span class="text-xs text-gray-500">Stock: ${p.stock}</span>
-            </div>
+    const orderedCategories = [
+        { key: 'refresco', label: 'Bebidas' },
+        { key: 'mekato', label: 'Mekato' },
+        { key: 'cerveza', label: 'Cerveza' },
+        { key: 'otro', label: 'Otros' }
+    ];
+
+    const visibleProducts = products.filter(p => p.stock > 0);
+    const grouped = orderedCategories.map(section => {
+        const items = visibleProducts.filter(p => p.category === section.key);
+        return { ...section, items };
+    }).filter(section => section.items.length > 0);
+
+    if (grouped.length === 0) {
+        grid.innerHTML = '<div class="col-span-full text-center py-8 text-gray-500">No hay productos disponibles</div>';
+        return;
+    }
+
+    grid.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
+            ${grouped.map(section => `
+                <div class="card p-3">
+                    <div class="card__header px-0 pt-0 pb-3 mb-3 border-b border-gray-700">
+                        <h3 class="text-lg font-bold text-white">${section.label}</h3>
+                    </div>
+                    <div class="space-y-2">
+                        ${section.items.map(p => `
+                            <button type="button" class="w-full text-left rounded-lg border p-3 bg-gray-800 hover:bg-gray-700 transition-colors ${p.stock <= p.min_stock ? 'border-red-400' : 'border-gray-600'}" onclick="window.addToCart('${p.id}')">
+                                <div class="flex justify-between items-center gap-2">
+                                    <span class="font-semibold text-sm text-white">${escapeHtml(p.name)}</span>
+                                    <span class="text-xs text-gray-300">Stock: ${p.stock}</span>
+                                </div>
+                                <div class="mt-1 text-green-400 font-bold">${formatCurrency(p.price)}</div>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('')}
         </div>
-    `).join('');
+    `;
 }
 
 window.addToCart = (productId) => {
-    const product = products.find(p => p.id === productId);
+    const product = findProductById(productId);
     if (!product) return;
 
-    const existing = cart.find(i => i.product.id === productId);
+    const existing = cart.find(i => String(i.product.id) === String(productId));
     if (existing) {
         if (existing.quantity >= product.stock) {
             showToast('No hay suficiente stock', 'error');
@@ -335,12 +452,12 @@ window.addToCart = (productId) => {
 };
 
 window.updateCartQuantity = (productId, delta) => {
-    const item = cart.find(i => i.product.id === productId);
+    const item = cart.find(i => String(i.product.id) === String(productId));
     if (!item) return;
 
     const newQ = item.quantity + delta;
     if (newQ <= 0) {
-        cart = cart.filter(i => i.product.id !== productId);
+        cart = cart.filter(i => String(i.product.id) !== String(productId));
     } else if (newQ > item.product.stock) {
         showToast('No hay suficiente stock', 'error');
     } else {
@@ -350,9 +467,62 @@ window.updateCartQuantity = (productId, delta) => {
 };
 
 window.removeFromCart = (productId) => {
-    cart = cart.filter(i => i.product.id !== productId);
+    cart = cart.filter(i => String(i.product.id) !== String(productId));
     updateCartUI();
 };
+
+async function loadDailySalesSummary() {
+    try {
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        const todayEnd = new Date();
+        todayEnd.setHours(23, 59, 59, 999);
+
+        const start = todayStart.toISOString();
+        const end = todayEnd.toISOString();
+
+        const { data: sales, error: salesError } = await supabase
+            .from('sales')
+            .select('id, total, created_at')
+            .gte('created_at', start)
+            .lte('created_at', end)
+            .order('created_at', { ascending: false });
+
+        if (salesError) throw salesError;
+
+        const saleIds = (sales || []).map(sale => sale.id);
+        let totalUnits = 0;
+        let productSet = new Set();
+        let totalRevenue = 0;
+
+        if (saleIds.length > 0) {
+            const { data: items, error: itemsError } = await supabase
+                .from('sale_items')
+                .select('sale_id, product_id, quantity')
+                .in('sale_id', saleIds);
+
+            if (itemsError) throw itemsError;
+
+            totalUnits = (items || []).reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+
+            const productIds = [...new Set((items || []).map(item => item.product_id).filter(Boolean))];
+            const productLookup = await getProductNameLookup(productIds);
+            (items || []).forEach(item => {
+                const productName = productLookup[String(item.product_id)];
+                if (productName) productSet.add(productName);
+            });
+        }
+
+        totalRevenue = (sales || []).reduce((sum, sale) => sum + Number(sale.total || 0), 0);
+
+        const productsCount = productSet.size;
+        document.getElementById('cart-day-products').textContent = String(productsCount);
+        document.getElementById('cart-day-qty').textContent = String(totalUnits);
+        document.getElementById('cart-day-total').textContent = formatCurrency(totalRevenue);
+    } catch (error) {
+        console.error('Error loading daily sales summary:', error);
+    }
+}
 
 function updateCartUI() {
     const container = document.getElementById('cart-items');
@@ -416,6 +586,8 @@ async function processSale() {
         cart = [];
         updateCartUI();
         await loadProducts();
+        await loadDailySalesSummary();
+        await loadSalesHistory();
         renderInventoryGrid();
         renderPosGrid();
         checkLowStock();
@@ -434,12 +606,11 @@ async function loadSalesHistory() {
         const dateStr = document.getElementById('history-date').value;
         if (!dateStr) return;
 
-        const start = dateStr + 'T00:00:00Z';
-        const end = dateStr + 'T23:59:59Z';
+        const { start, end } = getLocalDateRange(dateStr);
 
         const { data, error } = await supabase
             .from('sales')
-            .select('*, profiles:sold_by(full_name)')
+            .select('*')
             .gte('created_at', start)
             .lte('created_at', end)
             .order('created_at', { ascending: false });
@@ -447,25 +618,67 @@ async function loadSalesHistory() {
         if (error) throw error;
 
         const tbody = document.getElementById('sales-history-body');
-        const dailyTotal = data.reduce((sum, s) => sum + Number(s.total), 0);
+        const dailyTotal = (data || []).reduce((sum, s) => sum + Number(s.total), 0);
         document.getElementById('sales-daily-total').textContent = formatCurrency(dailyTotal);
 
-        if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No hay ventas registradas en esta fecha.</td></tr>';
+        if (!data || data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay ventas registradas en esta fecha.</td></tr>';
             return;
         }
 
-        tbody.innerHTML = data.map(sale => `
-            <tr>
-                <td>#${String(sale.id).substring(0,8)}</td>
-                <td>${formatDate(sale.created_at)}</td>
-                <td>${escapeHtml(sale.profiles?.full_name || 'Sistema')}</td>
-                <td class="font-bold">${formatCurrency(sale.total)}</td>
-                <td>
-                    <button class="btn btn--sm" onclick="window.viewSaleDetail('${sale.id}')">Ver Detalle</button>
-                </td>
-            </tr>
-        `).join('');
+        const saleIds = data.map(sale => sale.id);
+        const userIds = [...new Set((data || []).map(sale => sale.sold_by).filter(Boolean))];
+
+        const { data: saleItems, error: itemsError } = await supabase
+            .from('sale_items')
+            .select('sale_id, product_id, quantity, unit_price, subtotal')
+            .in('sale_id', saleIds);
+
+        if (itemsError) throw itemsError;
+
+        let profileLookup = {};
+        if (userIds.length > 0) {
+            const { data: profileRows, error: profilesError } = await supabase
+                .from('profiles')
+                .select('id, full_name')
+                .in('id', userIds);
+
+            if (profilesError) throw profilesError;
+            profileLookup = Object.fromEntries((profileRows || []).map(profile => [String(profile.id), profile.full_name]));
+        }
+
+        const productIds = [...new Set((saleItems || []).map(item => item.product_id).filter(Boolean))];
+        const productLookup = await getProductNameLookup(productIds);
+
+        const productsBySale = (saleItems || []).reduce((acc, item) => {
+            const key = String(item.sale_id);
+            if (!acc[key]) acc[key] = [];
+            acc[key].push({
+                ...item,
+                productName: productLookup[String(item.product_id)] || 'Producto'
+            });
+            return acc;
+        }, {});
+
+        tbody.innerHTML = data.map(sale => {
+            const items = productsBySale[String(sale.id)] || [];
+            const productList = items.length
+                ? items.map(item => `${item.productName} (${item.quantity})`).join(', ')
+                : 'Sin productos';
+
+            return `
+                <tr>
+                    <td>#${String(sale.id).substring(0,8)}</td>
+                    <td>${formatDate(sale.created_at)}</td>
+                    <td>${escapeHtml(profileLookup[String(sale.sold_by)] || 'Sistema')}</td>
+                    <td class="text-sm max-w-xs">${escapeHtml(productList)}</td>
+                    <td class="font-bold">${formatCurrency(sale.total)}</td>
+                    <td>
+                        <button class="btn btn--sm" onclick="window.viewSaleDetail('${sale.id}')">Ver Detalle</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
 
     } catch (error) {
         console.error('Error loading sales history:', error);
@@ -477,10 +690,13 @@ window.viewSaleDetail = async (saleId) => {
     try {
         const { data, error } = await supabase
             .from('sale_items')
-            .select('*, products(name)')
+            .select('sale_id, product_id, quantity, unit_price, subtotal')
             .eq('sale_id', saleId);
 
         if (error) throw error;
+
+        const productIds = [...new Set((data || []).map(item => item.product_id).filter(Boolean))];
+        const productLookup = await getProductNameLookup(productIds);
 
         const html = `
             <table class="table w-full">
@@ -493,14 +709,17 @@ window.viewSaleDetail = async (saleId) => {
                     </tr>
                 </thead>
                 <tbody>
-                    ${data.map(item => `
-                        <tr>
-                            <td>${escapeHtml(item.products?.name || 'Desconocido')}</td>
-                            <td>${item.quantity}</td>
-                            <td>${formatCurrency(item.unit_price)}</td>
-                            <td>${formatCurrency(item.subtotal)}</td>
-                        </tr>
-                    `).join('')}
+                    ${(data || []).map(item => {
+                        const productName = productLookup[String(item.product_id)] || 'Desconocido';
+                        return `
+                            <tr>
+                                <td>${escapeHtml(productName)}</td>
+                                <td>${item.quantity}</td>
+                                <td>${formatCurrency(item.unit_price)}</td>
+                                <td>${formatCurrency(item.subtotal)}</td>
+                            </tr>
+                        `;
+                    }).join('')}
                 </tbody>
             </table>
         `;

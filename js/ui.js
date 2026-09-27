@@ -125,6 +125,25 @@ export function setLoading(targetOrLoading, maybeTarget = null) {
   }
 }
 
+export function getLocalDateString(date = new Date()) {
+  const localDate = new Date(date);
+  const year = localDate.getFullYear();
+  const month = String(localDate.getMonth() + 1).padStart(2, '0');
+  const day = String(localDate.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function getLocalDateRange(dateString) {
+  const [year, month, day] = (dateString || getLocalDateString()).split('-').map(Number);
+  const start = new Date(year, month - 1, day, 0, 0, 0, 0);
+  const end = new Date(year, month - 1, day, 23, 59, 59, 999);
+
+  return {
+    start: start.toISOString(),
+    end: end.toISOString()
+  };
+}
+
 // Formatea fecha a DD/MM/YYYY HH:mm
 export function formatDate(dateStr) {
   if (!dateStr) return '';

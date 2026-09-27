@@ -39,7 +39,51 @@
 .btn--sm { padding: var(--space-xs) var(--space-sm); font-size: var(--text-sm); }
 .btn--lg { padding: var(--space-md) var(--space-lg); font-size: var(--text-lg); }
 .btn--block { width: 100%; display: flex; }
-.btn--icon { padding: var(--space-sm); border-radius: var(--border-radius-full); }
+.btn--icon { padding: 0.45rem 0.55rem; border-radius: 10px; min-width: 2.2rem; min-height: 2.2rem; }
+
+.inventory-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.inventory-actions .edit-product-btn,
+.inventory-actions .delete-product-btn {
+  position: relative;
+  z-index: 30;
+  pointer-events: auto;
+  cursor: pointer;
+  font-size: 0.72rem;
+  line-height: 1.2;
+  padding: 0.6rem 0.8rem;
+  min-height: 2.35rem;
+  white-space: nowrap;
+  border-radius: 10px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.inventory-actions .edit-product-btn {
+  background: #a3e635;
+  border: 1px solid #a3e635;
+  color: #111312;
+}
+
+.inventory-actions .edit-product-btn:hover {
+  background: #c4f05a;
+}
+
+.inventory-actions .delete-product-btn {
+  background: #ef4444;
+  border: 1px solid #ef4444;
+  color: #ffffff;
+}
+
+.inventory-actions .delete-product-btn:hover {
+  background: #dc2626;
+}
 
 .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 

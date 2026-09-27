@@ -1,6 +1,6 @@
 import { supabase } from '../supabase.js';
 import { getCurrentUser } from '../auth.js';
-import { showToast, setLoading } from '../ui.js';
+import { showToast, setLoading, getLocalDateString } from '../ui.js';
 
 let spaces = [];
 
@@ -75,8 +75,7 @@ export async function init() {
   if (!user) return;
 
   const dateInput = document.getElementById('reservation-date');
-  const today = new Date();
-  const todayValue = today.toISOString().split('T')[0];
+  const todayValue = getLocalDateString();
   dateInput.min = todayValue;
   dateInput.value = todayValue;
 
@@ -149,7 +148,7 @@ async function submitReservation(event) {
 
     showToast('Reserva creada. Queda pendiente de aprobación.', 'success');
     event.target.reset();
-    document.getElementById('reservation-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('reservation-date').value = getLocalDateString();
   } catch (error) {
     showToast('No se pudo crear la reserva', 'error');
     console.error(error);
