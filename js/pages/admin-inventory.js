@@ -13,6 +13,10 @@ function findProductById(id) {
     return products.find(product => String(product.id) === String(id));
 }
 
+function isLowStock(product) {
+    return Number(product.stock ?? 0) <= Number(product.min_stock ?? 0);
+}
+
 export function render() {
     return `
         <div class="page-container">
@@ -199,10 +203,10 @@ async function loadProducts() {
 }
 
 function checkLowStock() {
-    const lowStockCount = products.filter(p => p.stock <= p.min_stock).length;
+    const lowStockCount = products.filter(isLowStock).length;
     const alert = document.getElementById('low-stock-alert');
     if (lowStockCount > 0) {
-        alert.textContent = `¡Atención! ${lowStockCount} productos tienen stock bajo.`;
+        alert.textContent = `¡Atención! ${lowStockCount} productos están en su stock mínimo y deben comprarse.`;
         alert.classList.remove('hidden');
     } else {
         alert.classList.add('hidden');
@@ -266,15 +270,23 @@ function renderInventoryGrid() {
                 const itemsHtml = section.items.map(p => {
                     let stockClass = 'bg-green-100 text-green-800';
                     let cardClass = '';
-                    if (p.stock <= p.min_stock) {
+                    const isStockCritical = isLowStock(p);
+                    if (isStockCritical) {
                         stockClass = 'bg-red-100 text-red-800';
                         cardClass = 'border-l-4 border-red-500';
                     } else if (p.stock <= p.min_stock * 2) {
                         stockClass = 'bg-orange-100 text-orange-800';
                     }
 
+                    const stockAlert = isStockCritical ? `
+                        <div class="mb-2 rounded border border-red-300 bg-red-100 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-red-700">
+                            Stock mínimo • Debe comprarse
+                        </div>
+                    ` : '';
+
                     return `
                         <div class="card p-3 flex flex-col ${cardClass}">
+                            ${stockAlert}
                             <div class="flex justify-between items-center gap-2 mb-2">
                                 <h4 class="font-bold text-sm truncate" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</h4>
                             </div>
@@ -419,11 +431,12 @@ function renderPosGrid() {
                     </div>
                     <div class="space-y-2">
                         ${section.items.map(p => `
-                            <button type="button" class="w-full text-left rounded-lg border p-3 bg-gray-800 hover:bg-gray-700 transition-colors ${p.stock <= p.min_stock ? 'border-red-400' : 'border-gray-600'}" onclick="window.addToCart('${p.id}')">
+                            <button type="button" class="w-full text-left rounded-lg border p-3 bg-gray-800 hover:bg-gray-700 transition-colors ${isLowStock(p) ? 'border-red-400' : 'border-gray-600'}" onclick="window.addToCart('${p.id}')">
                                 <div class="flex justify-between items-center gap-2">
                                     <span class="font-semibold text-sm text-white">${escapeHtml(p.name)}</span>
                                     <span class="text-xs text-gray-300">Stock: ${p.stock}</span>
                                 </div>
+                                ${isLowStock(p) ? '<div class="mt-1 text-xs font-semibold text-red-300">Stock mínimo • Debe comprarse</div>' : ''}
                                 <div class="mt-1 text-green-400 font-bold">${formatCurrency(p.price)}</div>
                             </button>
                         `).join('')}

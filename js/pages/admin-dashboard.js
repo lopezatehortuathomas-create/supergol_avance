@@ -37,6 +37,10 @@ export async function render() {
           <div class="panel-heading"><h3>TOP PRODUCTOS MÁS VENDIDOS</h3><span></span></div>
           <div id="top-products-chart" class="bar-chart" aria-label="Productos más vendidos"></div>
           <div id="top-products-labels" class="chart-labels"></div>
+          <div style="display:flex; justify-content:center; align-items:center; gap:8px; margin-top:12px; font-size:12px; color:#d1d5db;">
+            <label for="dashboard-month-filter" style="font-weight:600;">Mes</label>
+            <input type="month" id="dashboard-month-filter" class="form-input w-auto" style="min-width: 140px;" />
+          </div>
         </section>
         <section class="dashboard-list dashboard-list--wide">
           <div class="panel-heading"><h3>INVENTARIO EN ALERTA DE STOCK</h3><span></span></div>
@@ -57,8 +61,15 @@ export async function init() {
   const user = await (await import('../auth.js')).getCurrentUser();
   if (!isAdmin(user)) return;
 
+  const monthInput = document.getElementById('dashboard-month-filter');
+  const monthValue = new Date().toISOString().slice(0, 7);
+  monthInput.value = monthValue;
+
   document.getElementById('btn-gestionar-reservas').addEventListener('click', () => navigateTo('#/admin/reservas'));
   document.getElementById('btn-nueva-venta').addEventListener('click', () => navigateTo('#/admin/inventario'));
+  monthInput.addEventListener('change', async () => {
+    await loadTopProducts();
+  });
 
   await loadStats();
   await loadTopProducts();
@@ -67,9 +78,33 @@ export async function init() {
 
 async function loadTopProducts() {
   try {
+    const monthInput = document.getElementById('dashboard-month-filter');
+    const selectedMonth = monthInput?.value || new Date().toISOString().slice(0, 7);
+    const [year, month] = selectedMonth.split('-').map(Number);
+    const start = new Date(year, month - 1, 1, 0, 0, 0, 0);
+    const end = new Date(year, month, 1, 0, 0, 0, 0);
+
+    const { data: salesMonth, error: salesError } = await supabase
+      .from('sales')
+      .select('id')
+      .gte('created_at', start.toISOString())
+      .lt('created_at', end.toISOString());
+
+    if (salesError) throw salesError;
+
+    if (!salesMonth || salesMonth.length === 0) {
+      const chart = document.getElementById('top-products-chart');
+      const labels = document.getElementById('top-products-labels');
+      if (chart) chart.innerHTML = '<div class="empty-chart-state">Sin ventas</div>';
+      if (labels) labels.innerHTML = '<span>--</span>';
+      return;
+    }
+
+    const saleIds = salesMonth.map(sale => sale.id);
     const { data, error } = await supabase
       .from('sale_items')
-      .select('product_id, quantity');
+      .select('product_id, quantity')
+      .in('sale_id', saleIds);
 
     if (error) throw error;
 
@@ -112,7 +147,7 @@ async function loadTopProducts() {
     chart.innerHTML = entries.map(([, value]) => `
       <i style="height: ${Math.max((value / maxValue) * 100, 12)}%"></i>
     `).join('');
-    labels.innerHTML = entries.map(([name]) => `<span>${name}</span>`).join('');
+    labels.innerHTML = entries.map(([name, qty]) => `<span>${name} (${qty})</span>`).join('');
   } catch (error) {
     console.error('Error loading top products', error);
   }
@@ -125,7 +160,6 @@ async function loadStats() {
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
 
-    // Reservas hoy
     const { count: countHoy, error: err1 } = await supabase
       .from('reservations')
       .select('*', { count: 'exact', head: true })
@@ -135,22 +169,21 @@ async function loadStats() {
     if (err1) throw err1;
     document.getElementById('stat-res-hoy').textContent = countHoy || 0;
 
-    // Bajo stock (min_stock not defined in schema directly, assuming stock < 10 for example, or schema has it)
-    const { count: countStock, error: err2 } = await supabase
+    const { data: productsData, error: err2 } = await supabase
       .from('products')
-      .select('*', { count: 'exact', head: true })
-      .lt('stock', 5); // placeholder threshold
+      .select('stock, min_stock');
     if (err2) throw err2;
-    document.getElementById('stat-bajo-stock').textContent = countStock || 0;
 
-    // Ventas hoy
+    const lowStockProducts = (productsData || []).filter(product => Number(product.stock ?? 0) <= Number(product.min_stock ?? 0));
+    document.getElementById('stat-bajo-stock').textContent = lowStockProducts.length;
+
     const { data: ventasHoy, error: err3 } = await supabase
       .from('sales')
       .select('total')
       .gte('created_at', today.toISOString())
       .lt('created_at', tomorrow.toISOString());
     if (err3) throw err3;
-    
+
     const totalVentas = ventasHoy ? ventasHoy.reduce((sum, v) => sum + Number(v.total), 0) : 0;
     document.getElementById('stat-ventas-hoy').textContent = formatCurrency(totalVentas);
 
@@ -161,18 +194,24 @@ async function loadStats() {
 
 async function loadRecentActivity() {
   try {
-    // Recent reservations
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
     const { data: resData, error: resError } = await supabase
       .from('reservations')
       .select('id, start_time, status, spaces(name)')
-      .order('created_at', { ascending: false })
+      .gte('start_time', today.toISOString())
+      .lt('start_time', tomorrow.toISOString())
+      .order('start_time', { ascending: true })
       .limit(5);
-      
+
     if (resError) throw resError;
-    
+
     const resList = document.getElementById('recent-reservations-list');
     if (!resData || resData.length === 0) {
-      resList.innerHTML = '<li>No hay reservas recientes</li>';
+      resList.innerHTML = '<li>No hay reservas para hoy</li>';
     } else {
       resList.innerHTML = resData.map(r => `
         <li class="item-list-row">
@@ -182,23 +221,24 @@ async function loadRecentActivity() {
       `).join('');
     }
 
-    // Recent sales
-    const { data: salesData, error: salesError } = await supabase
-      .from('sales')
-      .select('id, created_at, total')
-      .order('created_at', { ascending: false })
+    const { data: stockAlertData, error: stockAlertError } = await supabase
+      .from('products')
+      .select('id, name, stock, min_stock')
+      .order('stock', { ascending: true })
       .limit(5);
 
-    if (salesError) throw salesError;
+    if (stockAlertError) throw stockAlertError;
+
+    const lowStockProducts = (stockAlertData || []).filter(product => Number(product.stock ?? 0) <= Number(product.min_stock ?? 0));
 
     const salesList = document.getElementById('recent-sales-list');
-    if (!salesData || salesData.length === 0) {
-      salesList.innerHTML = '<li>No hay ventas recientes</li>';
+    if (!lowStockProducts || lowStockProducts.length === 0) {
+      salesList.innerHTML = '<li>No hay productos en stock mínimo</li>';
     } else {
-      salesList.innerHTML = salesData.map(s => `
+      salesList.innerHTML = lowStockProducts.map(product => `
         <li class="item-list-row">
-          <span>Venta #${String(s.id).substring(0,6)} - ${new Date(s.created_at).toLocaleTimeString()}</span>
-          <span>${formatCurrency(s.total)}</span>
+          <span>${product.name}</span>
+          <span class="text-red-300">Stock: ${product.stock}/${product.min_stock}</span>
         </li>
       `).join('');
     }

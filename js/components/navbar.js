@@ -16,7 +16,6 @@ export function render(user) {
   ` : '';
 
   const userName = user.user_metadata?.full_name || user.email || 'Usuario';
-
   return `
     <nav class="sidebar">
       <div class="sidebar-header">
@@ -36,11 +35,10 @@ export function render(user) {
         <a href="#/" class="nav-link" data-path="#/"><span>⌂</span> Inicio</a>
         <a href="#/reservar" class="nav-link" data-path="#/reservar"><span>▣</span> Reservar</a>
         <a href="#/mis-reservas" class="nav-link" data-path="#/mis-reservas"><span>≡</span> Mis Reservas</a>
-        <a href="#/guia" class="nav-link" data-path="#/guia"><span>?</span> Manual de usuario</a>
-        
         ${adminNav}
         
         <div class="sidebar-divider"></div>
+        <a href="#/guia" class="nav-link" data-path="#/guia"><span>?</span> Manual de usuario</a>
         <a href="#" id="btn-logout" class="nav-link text-danger">🚪 Cerrar Sesión</a>
       </div>
     </nav>

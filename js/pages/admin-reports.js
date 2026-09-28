@@ -9,9 +9,15 @@ export function render() {
         <div class="page-container">
             <header class="page-header flex justify-between items-center mb-4">
                 <h2>Reportes</h2>
-                <div class="flex gap-2">
-                    <input type="date" id="report-start" class="form-input w-auto">
-                    <input type="date" id="report-end" class="form-input w-auto">
+                <div class="flex gap-2 items-center flex-wrap">
+                    <label class="text-sm text-gray-300">
+                        <span class="block text-xs uppercase tracking-wide text-gray-400">Fecha inicio</span>
+                        <input type="date" id="report-start" class="form-input w-auto mt-1">
+                    </label>
+                    <label class="text-sm text-gray-300">
+                        <span class="block text-xs uppercase tracking-wide text-gray-400">Fecha fin</span>
+                        <input type="date" id="report-end" class="form-input w-auto mt-1">
+                    </label>
                     <button id="btn-generate-report" class="btn btn--primary">Generar Reporte</button>
                 </div>
             </header>
@@ -84,33 +90,55 @@ export async function init() {
             return;
         }
 
-        const end = new Date();
-        const start = new Date();
-        start.setDate(end.getDate() - 30);
+        const today = new Date();
 
-        document.getElementById('report-start').value = getLocalDateString(start);
-        document.getElementById('report-end').value = getLocalDateString(end);
+        const reportStart = document.getElementById('report-start');
+        const reportEnd = document.getElementById('report-end');
 
+        reportStart.value = getLocalDateString(today);
+        reportEnd.value = getLocalDateString(today);
+
+        reportStart.addEventListener('change', handleDateFilterChange);
+        reportEnd.addEventListener('change', handleDateFilterChange);
         document.getElementById('btn-generate-report').addEventListener('click', generateReports);
 
-        // Generate initially
         await generateReports();
     } catch (error) {
         console.error('Error init reports:', error);
     }
 }
 
+async function handleDateFilterChange() {
+    const startInput = document.getElementById('report-start');
+    const endInput = document.getElementById('report-end');
+
+    if (!startInput.value && !endInput.value) return;
+
+    if (startInput.value && endInput.value && startInput.value > endInput.value) {
+        const temp = startInput.value;
+        startInput.value = endInput.value;
+        endInput.value = temp;
+    }
+
+    await generateReports();
+}
+
 async function generateReports() {
     try {
         setLoading(true);
-        const startDate = document.getElementById('report-start').value;
-        const endDate = document.getElementById('report-end').value;
-        const { start: startIso, end: endIso } = getLocalDateRange(startDate);
-        const { start: endStartIso, end: endEndIso } = getLocalDateRange(endDate);
+
+        const startDate = document.getElementById('report-start').value || getLocalDateString(new Date());
+        const endDate = document.getElementById('report-end').value || startDate;
+
+        const normalizedStart = startDate <= endDate ? startDate : endDate;
+        const normalizedEnd = startDate <= endDate ? endDate : startDate;
+
+        const { start: startIso, end: endIso } = getLocalDateRange(normalizedStart);
+        const { start: rangeStartIso, end: rangeEndIso } = getLocalDateRange(normalizedEnd);
 
         await Promise.all([
-            generateSalesReports(startIso, endEndIso),
-            generateReservationsReport(startIso, endEndIso)
+            generateSalesReports(startIso, rangeEndIso),
+            generateReservationsReport(startIso, rangeEndIso)
         ]);
 
     } catch (error) {
