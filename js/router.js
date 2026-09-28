@@ -8,6 +8,7 @@ const routes = new Map([
   ['#/login', { module: './pages/login.js', requiresAuth: false, requiresAdmin: false, title: 'Iniciar Sesión - Super Gol' }],
   ['#/register', { module: './pages/register.js', requiresAuth: false, requiresAdmin: false, title: 'Registro - Super Gol' }],
   ['#/guia', { module: './pages/user-guide.js', requiresAuth: false, requiresAdmin: false, title: 'Manual de usuario - Super Gol' }],
+  ['#/admin/manual', { module: './pages/admin-guide.js', requiresAuth: true, requiresAdmin: true, title: 'Manual de administración - Super Gol' }],
   ['#/mis-reservas', { module: './pages/user-dashboard.js', requiresAuth: true, requiresAdmin: false, title: 'Mis Reservas - Super Gol' }],
   ['#/reservar', { module: './pages/reservations.js', requiresAuth: true, requiresAdmin: false, title: 'Reservar - Super Gol' }],
   ['#/admin', { module: './pages/admin-dashboard.js', requiresAuth: true, requiresAdmin: true, title: 'Admin - Super Gol' }],

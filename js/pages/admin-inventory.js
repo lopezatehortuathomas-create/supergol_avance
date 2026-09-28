@@ -24,6 +24,12 @@ export function render() {
                 <h2>Inventario</h2>
             </header>
 
+            <div class="tabs" role="tablist" aria-label="Secciones de inventario">
+                <button type="button" class="tab active" data-tab="inventory" role="tab">Catálogo</button>
+                <button type="button" class="tab" data-tab="pos" role="tab">Punto de venta</button>
+                <button type="button" class="tab" data-tab="history" role="tab">Historial de ventas</button>
+            </div>
+
             <div id="low-stock-alert" class="alert alert--warning hidden mb-4">
                 ¡Atención! Hay productos con stock bajo.
             </div>
@@ -175,8 +181,8 @@ export async function init() {
 
 function switchTab(tabId) {
     currentTab = tabId;
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('tab--active'));
-    document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('tab--active');
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
     
     document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
     document.getElementById(`tab-${tabId}`).classList.remove('hidden');

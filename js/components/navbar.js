@@ -13,6 +13,7 @@ export function render(user) {
     <a href="#/admin/usos" class="nav-link" data-path="#/admin/usos">📝 Registro de Usos</a>
     <a href="#/admin/inventario" class="nav-link" data-path="#/admin/inventario">📦 Inventario</a>
     <a href="#/admin/reportes" class="nav-link" data-path="#/admin/reportes">📈 Reportes</a>
+    <a href="#/admin/manual" class="nav-link" data-path="#/admin/manual">📘 Manual de administración</a>
   ` : '';
 
   const userName = user.user_metadata?.full_name || user.email || 'Usuario';

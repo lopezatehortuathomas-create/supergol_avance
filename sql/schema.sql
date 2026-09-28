@@ -69,6 +69,21 @@ CREATE TABLE public.reservations (
   EXCLUDE USING gist (space_id WITH =, tstzrange(start_time, end_time) WITH &&) WHERE (status IN ('pendiente', 'aprobada'))
 );
 
+CREATE TABLE public.reservation_history (
+  id INT PRIMARY KEY,
+  user_id UUID,
+  space_id INT,
+  start_time TIMESTAMPTZ NOT NULL,
+  end_time TIMESTAMPTZ NOT NULL,
+  status TEXT NOT NULL,
+  notes TEXT,
+  space_name TEXT,
+  space_type TEXT,
+  user_name TEXT,
+  user_phone TEXT,
+  archived_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 -- USAGE LOGS (manual usage registration)
 CREATE TABLE public.usage_logs (
   id SERIAL PRIMARY KEY,
@@ -204,6 +219,7 @@ CREATE TRIGGER set_updated_at_products
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.spaces ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reservations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.reservation_history ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.usage_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sales ENABLE ROW LEVEL SECURITY;
@@ -240,6 +256,9 @@ DROP POLICY IF EXISTS reservations_delete_own ON public.reservations;
 CREATE POLICY reservations_delete_own ON public.reservations FOR DELETE TO authenticated
   USING (user_id = auth.uid());
 
+CREATE POLICY reservation_history_select_admin ON public.reservation_history FOR SELECT TO authenticated
+  USING (public.is_admin());
+
 CREATE OR REPLACE FUNCTION public.delete_my_reservation(p_reservation_id integer)
 RETURNS boolean
 LANGUAGE plpgsql
@@ -256,6 +275,60 @@ $$;
 
 REVOKE ALL ON FUNCTION public.delete_my_reservation(integer) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.delete_my_reservation(integer) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.archive_and_delete_reservation(p_reservation_id integer)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT public.is_admin() THEN
+    RAISE EXCEPTION 'Only admins can delete reservations from management' USING ERRCODE = '42501';
+  END IF;
+
+  INSERT INTO public.reservation_history (
+    id, user_id, space_id, start_time, end_time, status, notes,
+    space_name, space_type, user_name, user_phone
+  )
+  SELECT
+    r.id, r.user_id, r.space_id, r.start_time, r.end_time, r.status, r.notes,
+    s.name, s.type, p.full_name, p.phone
+  FROM public.reservations r
+  LEFT JOIN public.spaces s ON s.id = r.space_id
+  LEFT JOIN public.profiles p ON p.id = r.user_id
+  WHERE r.id = p_reservation_id;
+
+  IF NOT FOUND THEN
+    RETURN false;
+  END IF;
+
+  DELETE FROM public.reservations WHERE id = p_reservation_id;
+  RETURN FOUND;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.archive_and_delete_reservation(integer) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.archive_and_delete_reservation(integer) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.delete_reservation_history_entry(p_reservation_id integer)
+RETURNS boolean
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT public.is_admin() THEN
+    RAISE EXCEPTION 'Only admins can delete reservation history' USING ERRCODE = '42501';
+  END IF;
+
+  DELETE FROM public.reservation_history WHERE id = p_reservation_id;
+  RETURN FOUND;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.delete_reservation_history_entry(integer) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.delete_reservation_history_entry(integer) TO authenticated;
 
 -- USAGE LOGS
 CREATE POLICY usage_logs_admin_all ON public.usage_logs FOR ALL TO authenticated

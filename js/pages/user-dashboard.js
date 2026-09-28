@@ -99,6 +99,8 @@ async function loadReservations() {
       if (res.status === 'pendiente') {
         actions.push({ label: 'Actualizar', class: 'btn--primary btn--sm', action: 'edit' });
         actions.push({ label: 'Eliminar', class: 'btn--danger btn--sm', action: 'cancel' });
+      } else if (res.status === 'completada') {
+        actions.push({ label: 'Eliminar', class: 'btn--danger btn--sm', action: 'delete-history' });
       }
       html += renderReservationCard(res, actions);
     });
@@ -127,30 +129,37 @@ function bindActions(reservations) {
         return;
       }
       
-      if (action === 'cancel') {
-        showConfirm('¿Eliminar esta reserva?', 'La reserva quedará cancelada y dejará de ocupar el horario.', async () => {
-          const user = await getCurrentUser();
-          if (!user) return;
+      if ((action === 'cancel' && reservation?.status === 'pendiente') || (action === 'delete-history' && reservation?.status === 'completada')) {
+        const isHistoryDeletion = action === 'delete-history';
+        showConfirm(
+          isHistoryDeletion ? '¿Eliminar del historial?' : '¿Eliminar esta reserva?',
+          isHistoryDeletion
+            ? 'La reserva completada se eliminará permanentemente de tu historial.'
+            : 'La reserva se eliminará y dejará de ocupar el horario.',
+          async () => {
+            const user = await getCurrentUser();
+            if (!user) return;
 
-          setLoading(true);
-          try {
-            const { data: deleted, error } = await supabase
-              .rpc('delete_my_reservation', { p_reservation_id: Number(id) });
+            setLoading(true);
+            try {
+              const { data: deleted, error } = await supabase
+                .rpc('delete_my_reservation', { p_reservation_id: Number(id) });
 
-            if (error) throw error;
-            if (!deleted) {
-              throw new Error('La reserva no pertenece al usuario actual o ya fue eliminada.');
+              if (error) throw error;
+              if (!deleted) {
+                throw new Error('La reserva no pertenece al usuario actual o ya fue eliminada.');
+              }
+
+              showToast('Reserva eliminada correctamente', 'success');
+              await loadReservations();
+            } catch (error) {
+              showReservationError(error, 'eliminar');
+              console.error(error);
+            } finally {
+              setLoading(false);
             }
-
-            showToast('Reserva eliminada correctamente', 'success');
-            await loadReservations();
-          } catch (error) {
-            showReservationError(error, 'eliminar');
-            console.error(error);
-          } finally {
-            setLoading(false);
           }
-        });
+        );
       }
     });
   });
