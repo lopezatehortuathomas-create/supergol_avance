@@ -217,6 +217,10 @@ function openEditModal(reservation) {
       showToast('El horario seleccionado no es válido', 'warning');
       return;
     }
+    if (startTime <= new Date()) {
+      showToast('No puedes cambiar la reserva a una hora que ya pasó', 'warning');
+      return;
+    }
 
     setLoading(true);
     try {

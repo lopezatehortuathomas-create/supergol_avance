@@ -187,7 +187,8 @@ async function loadReservations() {
         actionsHtml += `<button class="btn btn--sm btn--success" data-action="update-status" data-status="aprobada" data-id="${res.id}">Aprobar</button> `;
         actionsHtml += `<button class="btn btn--sm btn--danger" data-action="update-status" data-status="rechazada" data-id="${res.id}">Rechazar</button> `;
       } else if (res.status === 'aprobada') {
-        actionsHtml += `<button class="btn btn--sm btn--primary" data-action="update-status" data-status="completada" data-id="${res.id}">Completar</button> `;
+        const reservationEnded = new Date(res.end_time) <= new Date();
+        actionsHtml += `<button class="btn btn--sm btn--primary" data-action="update-status" data-status="completada" data-id="${res.id}" ${reservationEnded ? '' : 'disabled title="Disponible al finalizar la reserva"'}>Completar</button> `;
         actionsHtml += `<button class="btn btn--sm btn--warning" data-action="update-status" data-status="cancelada" data-id="${res.id}">Cancelar</button> `;
       }
       actionsHtml += `<button class="btn btn--sm btn--danger" data-action="delete" data-id="${res.id}">Eliminar</button>`;
@@ -365,16 +366,32 @@ function bindTableActions() {
         const newStatus = e.target.dataset.status;
         showConfirm(`¿Confirmas el cambio de estado a ${newStatus}?`, async () => {
           setLoading(true);
-          const { error } = await supabase
-            .from('reservations')
-            .update({ status: newStatus })
-            .eq('id', id);
-          setLoading(false);
-          if (error) {
-            showToast('Error al actualizar estado', 'error');
-          } else {
+          try {
+            if (newStatus === 'completada') {
+              const { data: reservation, error: reservationError } = await supabase
+                .from('reservations')
+                .select('end_time')
+                .eq('id', id)
+                .single();
+              if (reservationError) throw reservationError;
+              if (new Date(reservation.end_time) > new Date()) {
+                showToast('No puedes completar la reserva antes de su hora de finalización', 'warning');
+                return;
+              }
+            }
+
+            const { error } = await supabase
+              .from('reservations')
+              .update({ status: newStatus })
+              .eq('id', id);
+            if (error) throw error;
             showToast('Estado actualizado', 'success');
             await refreshReservationTables();
+          } catch (error) {
+            console.error('Error al actualizar estado:', error);
+            showToast(error.message || 'Error al actualizar estado', 'error');
+          } finally {
+            setLoading(false);
           }
         });
       } else if (action === 'delete') {

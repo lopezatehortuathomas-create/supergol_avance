@@ -115,6 +115,10 @@ async function submitReservation(event) {
     showToast('Completa los datos dentro del horario de atención', 'warning');
     return;
   }
+  if (Number.isNaN(startTime.getTime()) || startTime <= new Date()) {
+    showToast('No puedes reservar una hora que ya pasó', 'warning');
+    return;
+  }
 
   setLoading(true);
   try {
