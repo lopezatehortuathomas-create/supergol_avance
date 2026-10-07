@@ -4,40 +4,67 @@ import { navigateTo } from '../router.js';
 export function render() {
     return `
         <div class="home-page" id="home-container">
-            <div class="hero text-center" style="padding: 3rem 1rem;">
-                <h1 id="hero-title">Bienvenido a ⚽ Super Gol</h1>
-                <p class="subtitle">Tu complejo recreativo favorito</p>
-                <div id="hero-actions" class="hero-actions" style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center;">
-                    <!-- Se llenará dinámicamente según el estado de autenticación -->
+            <section class="home-hero">
+                <div class="home-hero__content">
+                    <p class="home-hero__eyebrow"><span aria-hidden="true">●</span> DEPORTE · AMIGOS · PASIÓN</p>
+                    <h1 id="hero-title">Bienvenido a <span>Super Gol</span></h1>
+                    <p class="subtitle">Tu próximo gran partido empieza aquí.</p>
+                    <div id="hero-actions" class="hero-actions">
+                    </div>
                 </div>
-            </div>
-            
-            <section class="features-section" style="padding: 2rem 1rem;">
-                <h2 class="text-center" style="margin-bottom: 2rem;">Nuestras Instalaciones</h2>
-                <div class="grid-3" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                    <div class="card feature-card" data-route="/reservas" style="cursor: pointer; text-align: center;">
-                        <div class="feature-icon" style="font-size: 3rem;">⚽</div>
-                        <h3>Cancha de Fútbol</h3>
-                        <p>Reserva nuestra cancha sintética</p>
+                <div class="home-hero__pitch" aria-hidden="true">
+                    <span class="home-hero__ball">⚽</span>
+                    <span class="home-hero__pitch-label">TU CANCHA<br>TE ESPERA</span>
+                </div>
+            </section>
+
+            <section class="features-section" aria-labelledby="facilities-title">
+                <div class="section-heading">
+                    <div>
+                        <p class="home-hero__eyebrow">ENCUENTRA TU JUEGO</p>
+                        <h2 id="facilities-title">Nuestras instalaciones</h2>
                     </div>
-                    
-                    <div class="card feature-card" data-route="/reservas" style="cursor: pointer; text-align: center;">
-                        <div class="feature-icon" style="font-size: 3rem;">🏍️</div>
-                        <h3>Pista de Motocross</h3>
-                        <p>Vive la adrenalina en nuestra pista</p>
-                    </div>
-                    
-                    <div class="card feature-card" data-route="/reservas" style="cursor: pointer; text-align: center;">
-                        <div class="feature-icon" style="font-size: 3rem;">🎱</div>
-                        <h3>Mesa de Billar</h3>
-                        <p>Disfruta de una partida con amigos</p>
-                    </div>
-                    
-                    <div class="card feature-card" style="text-align: center;">
-                        <div class="feature-icon" style="font-size: 3rem;">🏪</div>
-                        <h3>Tienda</h3>
-                        <p>Refrescos, snacks y cervezas</p>
-                    </div>
+                    <span class="section-heading__note">Elige tu próximo plan</span>
+                </div>
+                <div class="features-grid">
+                    <button type="button" class="card feature-card feature-card--football" data-route="/reservas">
+                        <span class="feature-icon" aria-hidden="true">⚽</span>
+                        <span class="feature-card__content">
+                            <span class="feature-card__eyebrow">JUEGA EN EQUIPO</span>
+                            <span class="feature-card__title">Cancha de fútbol</span>
+                            <span class="feature-card__description">Reserva nuestra cancha sintética y arma el partido.</span>
+                        </span>
+                        <span class="feature-card__arrow" aria-hidden="true">↗</span>
+                    </button>
+
+                    <button type="button" class="card feature-card feature-card--motocross" data-route="/reservas">
+                        <span class="feature-icon" aria-hidden="true">🏍️</span>
+                        <span class="feature-card__content">
+                            <span class="feature-card__eyebrow">SUBE LA ADRENALINA</span>
+                            <span class="feature-card__title">Pista de motocross</span>
+                            <span class="feature-card__description">Siente la emoción y disfruta cada vuelta.</span>
+                        </span>
+                        <span class="feature-card__arrow" aria-hidden="true">↗</span>
+                    </button>
+
+                    <button type="button" class="card feature-card feature-card--billiards" data-route="/reservas">
+                        <span class="feature-icon" aria-hidden="true">🎱</span>
+                        <span class="feature-card__content">
+                            <span class="feature-card__eyebrow">EL PLAN CON AMIGOS</span>
+                            <span class="feature-card__title">Mesa de billar</span>
+                            <span class="feature-card__description">Una buena partida siempre es una buena idea.</span>
+                        </span>
+                        <span class="feature-card__arrow" aria-hidden="true">↗</span>
+                    </button>
+
+                    <article class="card feature-card feature-card--store">
+                        <span class="feature-icon" aria-hidden="true">🥤</span>
+                        <span class="feature-card__content">
+                            <span class="feature-card__eyebrow">RECARGA ENERGÍA</span>
+                            <span class="feature-card__title">Tienda</span>
+                            <span class="feature-card__description">Refrescos y snacks para completar el plan.</span>
+                        </span>
+                    </article>
                 </div>
             </section>
 

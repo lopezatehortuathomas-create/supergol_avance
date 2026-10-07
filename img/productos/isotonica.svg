@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none">
+  <defs>
+    <linearGradient id="sport" x1="71" y1="38" x2="165" y2="207" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#72f6dd"/>
+      <stop offset=".35" stop-color="#12a9b4"/>
+      <stop offset="1" stop-color="#134a90"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="87" y1="80" x2="110" y2="80" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff" stop-opacity=".65"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="118" cy="207" rx="53" ry="10" fill="#000" fill-opacity=".28"/>
+  <path d="M101 29h38v22l14 14 15 129a14 14 0 0 1-14 16H86a14 14 0 0 1-14-16L87 65l14-14V29Z" fill="url(#sport)" stroke="#9affeb" stroke-width="4"/>
+  <path d="M101 29h38v17h-38z" fill="#115a8e" stroke="#d8fff6" stroke-width="3"/>
+  <path d="M91 73h59" stroke="#d8fff6" stroke-opacity=".7" stroke-width="3"/>
+  <path d="m95 67-15 124c-1 8 3 14 10 17l16-143-11 2Z" fill="url(#shine)"/>
+  <path d="M80 106h82v51H80z" fill="#f4ffdc" stroke="#c8ff73" stroke-width="3"/>
+  <path d="m120 113 8 15 17 2-12 12 3 17-16-8-15 8 3-17-13-12 18-2 7-15Z" fill="#e9a92d"/>
+  <path d="M107 174h27" stroke="#d8fff6" stroke-linecap="round" stroke-width="4"/>
+  <circle cx="162" cy="88" r="5" fill="#e9fffc"/>
+</svg>

@@ -2,12 +2,11 @@ import { supabase } from '../supabase.js';
 import { getCurrentUser, isAdmin } from '../auth.js';
 import { showToast, showModal, showConfirm, setLoading, formatDate, formatCurrency, renderBadge, escapeHtml, closeModal, getLocalDateString, getLocalDateRange } from '../ui.js';
 import { navigateTo } from '../router.js';
-import { renderProductForm, getProductFormData } from '../components/product-form.js';
+import { renderProductForm, getProductFormData, getProductImage, updateProductImagePreview } from '../components/product-form.js';
 import { renderCartItem, renderCartSummary } from '../components/sale-form.js';
 
 let products = [];
 let cart = [];
-let currentTab = 'inventory';
 
 function findProductById(id) {
     return products.find(product => String(product.id) === String(id));
@@ -19,9 +18,12 @@ function isLowStock(product) {
 
 export function render() {
     return `
-        <div class="page-container">
-            <header class="page-header flex justify-between items-center mb-4">
-                <h2>Inventario</h2>
+        <div class="page-container inventory-page">
+            <header class="page-header inventory-page__header flex justify-between items-center mb-4">
+                <div>
+                    <p class="inventory-eyebrow">ADMINISTRACIÓN · TIENDA</p>
+                    <h2>Inventario</h2>
+                </div>
             </header>
 
             <div class="tabs" role="tablist" aria-label="Secciones de inventario">
@@ -30,46 +32,54 @@ export function render() {
                 <button type="button" class="tab" data-tab="history" role="tab">Historial de ventas</button>
             </div>
 
-            <div id="low-stock-alert" class="alert alert--warning hidden mb-4">
+            <div id="low-stock-alert" class="alert alert--warning hidden mb-4" role="status">
                 ¡Atención! Hay productos con stock bajo.
             </div>
 
             <!-- Inventory Tab -->
             <div id="tab-inventory" class="tab-content">
                 <div class="card">
-                    <div class="card__header flex justify-between items-center">
-                        <div class="flex gap-2">
-                            <input type="text" id="inventory-search" class="search-bar" placeholder="Buscar producto...">
-                            <select id="inventory-category-filter" class="form-input w-auto">
+                    <div class="card__header inventory-toolbar">
+                        <div class="inventory-toolbar__filters">
+                            <label class="inventory-search">
+                                <span class="inventory-search__icon" aria-hidden="true">⌕</span>
+                                <span class="sr-only">Buscar producto</span>
+                                <input type="search" id="inventory-search" class="form-input search-bar__input" placeholder="Buscar producto...">
+                            </label>
+                            <label class="inventory-category">
+                                <span class="sr-only">Filtrar por categoría</span>
+                                <select id="inventory-category-filter" class="form-input w-auto">
                                 <option value="all">Todas las categorías</option>
                                 <option value="refresco">Refresco</option>
                                 <option value="mekato">Mekato</option>
                                 <option value="cerveza">Cerveza</option>
                                 <option value="otro">Otro</option>
-                            </select>
+                                </select>
+                            </label>
                         </div>
-                        <button id="btn-add-product" class="btn btn--primary">Agregar Producto</button>
+                        <button id="btn-add-product" class="btn btn--primary"><span aria-hidden="true">＋</span> Agregar Producto</button>
                     </div>
                     <div class="card__body">
-                        <div id="inventory-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <div id="inventory-grid" class="inventory-grid" aria-live="polite">
+                            <div class="inventory-skeleton" aria-label="Cargando productos">
+                                <span class="inventory-skeleton__ball" aria-hidden="true">⚽</span>
+                                <span>Cargando catálogo...</span>
+                            </div>
                             <!-- Products will be loaded here -->
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- POS Tab -->
             <div id="tab-pos" class="tab-content hidden">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                     <div class="lg:col-span-2">
                         <div class="card">
                             <div class="card__header">
-                                <h3>Productos</h3>
+                                <h3>Productos para vender</h3>
                             </div>
                             <div class="card__body">
-                                <div id="pos-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                    <!-- POS Products will be loaded here -->
-                                </div>
+                                <div id="pos-grid" class="pos-grid" aria-live="polite"></div>
                             </div>
                         </div>
                     </div>
@@ -78,31 +88,33 @@ export function render() {
                             <div class="card__header">
                                 <h3>Carrito</h3>
                             </div>
-                            <div id="cart-daily-summary" class="p-3 border-b border-gray-700 bg-gray-800/60">
-                                <div class="text-xs uppercase tracking-wide text-gray-400 mb-2">Resumen del día</div>
-                                <div class="grid grid-cols-2 gap-2 text-sm">
-                                    <div class="bg-gray-900/70 rounded p-2">
-                                        <div class="text-gray-400">Productos</div>
-                                        <div id="cart-day-products" class="font-bold text-white">0</div>
+                            <div id="cart-daily-summary" class="inventory-day-summary">
+                                <div class="inventory-day-summary__title">Resumen del día</div>
+                                <div class="inventory-day-summary__grid">
+                                    <div class="inventory-day-summary__item">
+                                        <div class="inventory-day-summary__value" id="cart-day-products">0</div>
+                                        <div class="inventory-day-summary__label">Productos</div>
                                     </div>
-                                    <div class="bg-gray-900/70 rounded p-2">
-                                        <div class="text-gray-400">Unidades</div>
-                                        <div id="cart-day-qty" class="font-bold text-white">0</div>
+                                    <div class="inventory-day-summary__item">
+                                        <div class="inventory-day-summary__value" id="cart-day-qty">0</div>
+                                        <div class="inventory-day-summary__label">Unidades</div>
                                     </div>
-                                    <div class="bg-gray-900/70 rounded p-2 col-span-2">
-                                        <div class="text-gray-400">Recaudado</div>
-                                        <div id="cart-day-total" class="font-bold text-green-400">$0.00</div>
+                                    <div class="inventory-day-summary__item">
+                                        <div class="inventory-day-summary__value" id="cart-day-total">$0</div>
+                                        <div class="inventory-day-summary__label">Recaudado</div>
                                     </div>
                                 </div>
                             </div>
                             <div class="card__body flex-1 overflow-y-auto p-0">
-                                <div id="cart-items" class="divide-y">
-                                    <div class="p-4 text-center text-gray-500">Agrega productos al carrito</div>
+                                <div id="cart-items">
+                                    <div class="cart-empty">
+                                        <span aria-hidden="true">⚽</span>
+                                        <strong>Tu carrito está esperando</strong>
+                                        <p>Agrega productos para iniciar una venta.</p>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="p-4 border-t" id="cart-summary">
-                                <!-- Summary will be rendered here -->
-                            </div>
+                            <div class="inventory-cart-summary" id="cart-summary"></div>
                         </div>
                     </div>
                 </div>
@@ -113,8 +125,8 @@ export function render() {
                 <div class="card">
                     <div class="card__header flex justify-between items-center">
                         <h3>Historial de Ventas</h3>
-                        <div class="flex gap-2 items-center">
-                            <label class="font-bold">Total del día: <span id="sales-daily-total" class="text-green-600">$0.00</span></label>
+                        <div class="inventory-history-controls">
+                            <label class="inventory-sales-total">Total del día <span id="sales-daily-total">$0.00</span></label>
                             <input type="date" id="history-date" class="form-input w-auto">
                         </div>
                     </div>
@@ -164,6 +176,10 @@ export async function init() {
         document.getElementById('inventory-search').addEventListener('input', renderInventoryGrid);
         document.getElementById('inventory-category-filter').addEventListener('change', renderInventoryGrid);
         document.addEventListener('click', handleInventoryActionClick);
+        document.addEventListener('click', handleInventoryUtilityClick);
+        document.addEventListener('input', handleProductImagePreview);
+        document.addEventListener('change', handleProductImagePreview);
+        document.addEventListener('click', handlePosProductAnimation);
         document.getElementById('history-date').addEventListener('change', loadSalesHistory);
 
         // Initial setup
@@ -180,7 +196,6 @@ export async function init() {
 }
 
 function switchTab(tabId) {
-    currentTab = tabId;
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
     
@@ -209,10 +224,11 @@ async function loadProducts() {
 }
 
 function checkLowStock() {
-    const lowStockCount = products.filter(isLowStock).length;
+    const lowStockProducts = products.filter(isLowStock);
     const alert = document.getElementById('low-stock-alert');
-    if (lowStockCount > 0) {
-        alert.textContent = `¡Atención! ${lowStockCount} productos están en su stock mínimo y deben comprarse.`;
+    if (lowStockProducts.length > 0) {
+        const names = lowStockProducts.map(product => escapeHtml(product.name)).join(', ');
+        alert.innerHTML = `<span><strong>${lowStockProducts.length} productos con stock bajo:</strong> ${names}</span><button type="button" class="inventory-low-stock-link" data-show-low-stock>Ver catálogo</button>`;
         alert.classList.remove('hidden');
     } else {
         alert.classList.add('hidden');
@@ -254,7 +270,7 @@ function renderInventoryGrid() {
     });
 
     if (filtered.length === 0) {
-        grid.innerHTML = '<div class="col-span-full text-center py-8 text-gray-500">No se encontraron productos</div>';
+        grid.innerHTML = '<div class="inventory-empty"><span aria-hidden="true">⌕</span><strong>No encontramos productos</strong><p>Prueba con otra búsqueda o categoría.</p></div>';
         return;
     }
 
@@ -266,61 +282,73 @@ function renderInventoryGrid() {
     const visibleGroups = grouped.filter(section => section.items.length > 0);
 
     if (visibleGroups.length === 0) {
-        grid.innerHTML = '<div class="col-span-full text-center py-8 text-gray-500">No se encontraron productos</div>';
+        grid.innerHTML = '<div class="inventory-empty"><span aria-hidden="true">⌕</span><strong>No encontramos productos</strong><p>Prueba con otra búsqueda o categoría.</p></div>';
         return;
     }
 
     grid.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 col-span-full w-full">
-            ${visibleGroups.map(section => {
+        ${visibleGroups.map(section => {
                 const itemsHtml = section.items.map(p => {
-                    let stockClass = 'bg-green-100 text-green-800';
-                    let cardClass = '';
+                    let stockClass = 'product-stock--normal';
                     const isStockCritical = isLowStock(p);
-                    if (isStockCritical) {
-                        stockClass = 'bg-red-100 text-red-800';
-                        cardClass = 'border-l-4 border-red-500';
-                    } else if (p.stock <= p.min_stock * 2) {
-                        stockClass = 'bg-orange-100 text-orange-800';
-                    }
+                    if (Number(p.stock) <= 0) stockClass = 'product-stock--empty';
+                    else if (isStockCritical || p.stock <= p.min_stock * 2) stockClass = 'product-stock--low';
 
                     const stockAlert = isStockCritical ? `
-                        <div class="mb-2 rounded border border-red-300 bg-red-100 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-red-700">
+                        <div class="product-stock-warning">
                             Stock mínimo • Debe comprarse
                         </div>
                     ` : '';
 
                     return `
-                        <div class="card p-3 flex flex-col ${cardClass}">
-                            ${stockAlert}
-                            <div class="flex justify-between items-center gap-2 mb-2">
-                                <h4 class="font-bold text-sm truncate" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</h4>
+                        <article class="card product-card ${Number(p.stock) <= 0 ? 'product-card--empty-stock' : ''}">
+                            <div class="product-card__media">
+                                <img class="product-card__image" src="${getProductImage(p.name, p.category)}"
+                                     alt="${escapeHtml(p.name)}" loading="lazy"
+                                     onerror="this.onerror=null;this.src='img/productos/generico.svg'">
                             </div>
-                            <div class="text-lg font-bold text-green-700 mb-2">${formatCurrency(p.price)}</div>
-                            <div class="mt-auto flex justify-between items-center gap-2">
-                                <span class="badge ${stockClass}">Stock: ${p.stock}</span>
+                            <div class="product-card__content">
+                                ${stockAlert}
+                                <h4 class="product-card__title" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</h4>
+                                <div class="product-card__price">${formatCurrency(p.price)}</div>
+                                <div class="product-card__meta">
+                                    <span class="product-stock ${stockClass}">${Number(p.stock) <= 0 ? 'Agotado' : `Stock: ${p.stock}`}</span>
+                                </div>
                                 <div class="flex gap-2 inventory-actions">
-                                    <button type="button" class="btn btn--sm edit-product-btn" data-product-id="${p.id}" aria-label="Editar producto">✏️ Editar</button>
-                                    <button type="button" class="btn btn--sm delete-product-btn" data-product-id="${p.id}" aria-label="Eliminar producto">🗑️ Borrar</button>
+                                    <button type="button" class="btn btn--sm edit-product-btn" data-product-id="${p.id}" aria-label="Editar producto">Editar</button>
+                                    <button type="button" class="btn btn--sm delete-product-btn" data-product-id="${p.id}" aria-label="Eliminar producto">Borrar</button>
                                 </div>
                             </div>
-                        </div>
+                        </article>
                     `;
                 }).join('');
 
                 return `
-                    <div class="card p-3">
-                        <div class="card__header px-0 pt-0 pb-3 mb-2 border-b border-gray-700">
-                            <h3 class="text-lg font-bold text-white">${section.label}</h3>
-                        </div>
-                        <div class="space-y-3">
-                            ${itemsHtml}
-                        </div>
-                    </div>
+                    <section class="inventory-category-group">
+                        <h3 class="inventory-category-group__title">${section.label}</h3>
+                        <div class="inventory-category-group__grid">${itemsHtml}</div>
+                    </section>
                 `;
             }).join('')}
-        </div>
     `;
+}
+
+function handleProductImagePreview(event) {
+    const form = event.target.closest('#product-form');
+    if (!form || !['product-name', 'product-category', 'product-image-file'].includes(event.target.id)) return;
+    updateProductImagePreview(form);
+}
+
+function handleInventoryUtilityClick(event) {
+    if (event.target.closest('[data-close-product-modal]')) {
+        closeModal();
+        return;
+    }
+
+    if (event.target.closest('[data-show-low-stock]')) {
+        switchTab('inventory');
+        document.getElementById('inventory-grid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 function handleInventoryActionClick(event) {
@@ -407,7 +435,6 @@ window.deleteProduct = (id) => {
     });
 };
 
-// --- POS Section ---
 function renderPosGrid() {
     const grid = document.getElementById('pos-grid');
     const orderedCategories = [
@@ -416,50 +443,70 @@ function renderPosGrid() {
         { key: 'cerveza', label: 'Cerveza' },
         { key: 'otro', label: 'Otros' }
     ];
-
-    const visibleProducts = products.filter(p => p.stock > 0);
-    const grouped = orderedCategories.map(section => {
-        const items = visibleProducts.filter(p => p.category === section.key);
-        return { ...section, items };
-    }).filter(section => section.items.length > 0);
+    const grouped = orderedCategories.map(section => ({
+        ...section,
+        items: products.filter(product => product.category === section.key)
+    })).filter(section => section.items.length > 0);
 
     if (grouped.length === 0) {
-        grid.innerHTML = '<div class="col-span-full text-center py-8 text-gray-500">No hay productos disponibles</div>';
+        grid.innerHTML = '<div class="inventory-empty"><span aria-hidden="true">🛒</span><strong>No hay productos disponibles</strong><p>Agrega productos al catálogo para comenzar.</p></div>';
         return;
     }
 
     grid.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 w-full">
+        <div class="pos-category-groups">
             ${grouped.map(section => `
-                <div class="card p-3">
-                    <div class="card__header px-0 pt-0 pb-3 mb-3 border-b border-gray-700">
-                        <h3 class="text-lg font-bold text-white">${section.label}</h3>
+                <section class="pos-category-group">
+                    <h3 class="pos-category-group__title">${section.label}</h3>
+                    <div class="pos-category-group__grid">
+                        ${section.items.map(product => {
+                            const outOfStock = Number(product.stock) <= 0;
+                            const lowStock = isLowStock(product);
+                            return `
+                                <button type="button" class="pos-product-card ${outOfStock ? 'pos-product-card--out-of-stock' : ''}"
+                                        onclick="window.addToCart('${product.id}')"
+                                        ${outOfStock ? 'disabled aria-disabled="true"' : ''}>
+                                    <span class="pos-product-card__media">
+                                        <img src="${getProductImage(product.name, product.category)}"
+                                             alt="${escapeHtml(product.name)}" loading="lazy"
+                                             onerror="this.onerror=null;this.src='img/productos/generico.svg'">
+                                    </span>
+                                    <span class="pos-product-card__body">
+                                        <span class="pos-product-card__title">${escapeHtml(product.name)}</span>
+                                        <span class="pos-product-card__price">${formatCurrency(product.price)}</span>
+                                        <span class="pos-product-card__stock ${outOfStock ? 'is-empty' : lowStock ? 'is-low' : ''}">
+                                            ${outOfStock ? 'Agotado' : `Stock: ${product.stock}`}
+                                        </span>
+                                    </span>
+                                    <span class="pos-product-card__action">${outOfStock ? 'Sin stock' : '＋ Agregar'}</span>
+                                    ${lowStock && !outOfStock ? '<span class="pos-product-card__warning">Stock bajo</span>' : ''}
+                                </button>
+                            `;
+                        }).join('')}
                     </div>
-                    <div class="space-y-2">
-                        ${section.items.map(p => `
-                            <button type="button" class="w-full text-left rounded-lg border p-3 bg-gray-800 hover:bg-gray-700 transition-colors ${isLowStock(p) ? 'border-red-400' : 'border-gray-600'}" onclick="window.addToCart('${p.id}')">
-                                <div class="flex justify-between items-center gap-2">
-                                    <span class="font-semibold text-sm text-white">${escapeHtml(p.name)}</span>
-                                    <span class="text-xs text-gray-300">Stock: ${p.stock}</span>
-                                </div>
-                                ${isLowStock(p) ? '<div class="mt-1 text-xs font-semibold text-red-300">Stock mínimo • Debe comprarse</div>' : ''}
-                                <div class="mt-1 text-green-400 font-bold">${formatCurrency(p.price)}</div>
-                            </button>
-                        `).join('')}
-                    </div>
-                </div>
+                </section>
             `).join('')}
         </div>
     `;
 }
 
+function handlePosProductAnimation(event) {
+    const productCard = event.target.closest('.pos-product-card:not(:disabled)');
+    if (!productCard) return;
+    productCard.classList.remove('pos-product-card--added');
+    requestAnimationFrame(() => {
+        productCard.classList.add('pos-product-card--added');
+        window.setTimeout(() => productCard.classList.remove('pos-product-card--added'), 260);
+    });
+}
+
 window.addToCart = (productId) => {
     const product = findProductById(productId);
-    if (!product) return;
+    if (!product || Number(product.stock) <= 0) return;
 
-    const existing = cart.find(i => String(i.product.id) === String(productId));
+    const existing = cart.find(item => String(item.product.id) === String(productId));
     if (existing) {
-        if (existing.quantity >= product.stock) {
+        if (existing.quantity >= Number(product.stock)) {
             showToast('No hay suficiente stock', 'error');
             return;
         }
@@ -471,22 +518,22 @@ window.addToCart = (productId) => {
 };
 
 window.updateCartQuantity = (productId, delta) => {
-    const item = cart.find(i => String(i.product.id) === String(productId));
+    const item = cart.find(cartItem => String(cartItem.product.id) === String(productId));
     if (!item) return;
 
-    const newQ = item.quantity + delta;
-    if (newQ <= 0) {
-        cart = cart.filter(i => String(i.product.id) !== String(productId));
-    } else if (newQ > item.product.stock) {
+    const newQuantity = item.quantity + delta;
+    if (newQuantity <= 0) {
+        cart = cart.filter(cartItem => String(cartItem.product.id) !== String(productId));
+    } else if (newQuantity > Number(item.product.stock)) {
         showToast('No hay suficiente stock', 'error');
     } else {
-        item.quantity = newQ;
+        item.quantity = newQuantity;
     }
     updateCartUI();
 };
 
 window.removeFromCart = (productId) => {
-    cart = cart.filter(i => String(i.product.id) !== String(productId));
+    cart = cart.filter(item => String(item.product.id) !== String(productId));
     updateCartUI();
 };
 
@@ -497,22 +544,19 @@ async function loadDailySalesSummary() {
         const todayEnd = new Date();
         todayEnd.setHours(23, 59, 59, 999);
 
-        const start = todayStart.toISOString();
-        const end = todayEnd.toISOString();
-
         const { data: sales, error: salesError } = await supabase
             .from('sales')
             .select('id, total, created_at')
-            .gte('created_at', start)
-            .lte('created_at', end)
+            .gte('created_at', todayStart.toISOString())
+            .lte('created_at', todayEnd.toISOString())
             .order('created_at', { ascending: false });
 
         if (salesError) throw salesError;
 
         const saleIds = (sales || []).map(sale => sale.id);
         let totalUnits = 0;
-        let productSet = new Set();
-        let totalRevenue = 0;
+        const productSet = new Set();
+        const totalRevenue = (sales || []).reduce((sum, sale) => sum + Number(sale.total || 0), 0);
 
         if (saleIds.length > 0) {
             const { data: items, error: itemsError } = await supabase
@@ -521,25 +565,22 @@ async function loadDailySalesSummary() {
                 .in('sale_id', saleIds);
 
             if (itemsError) throw itemsError;
-
             totalUnits = (items || []).reduce((sum, item) => sum + Number(item.quantity || 0), 0);
 
             const productIds = [...new Set((items || []).map(item => item.product_id).filter(Boolean))];
             const productLookup = await getProductNameLookup(productIds);
             (items || []).forEach(item => {
-                const productName = productLookup[String(item.product_id)];
-                if (productName) productSet.add(productName);
+                const name = productLookup[String(item.product_id)];
+                if (name) productSet.add(name);
             });
         }
 
-        totalRevenue = (sales || []).reduce((sum, sale) => sum + Number(sale.total || 0), 0);
-
-        const productsCount = productSet.size;
-        document.getElementById('cart-day-products').textContent = String(productsCount);
+        document.getElementById('cart-day-products').textContent = String(productSet.size);
         document.getElementById('cart-day-qty').textContent = String(totalUnits);
         document.getElementById('cart-day-total').textContent = formatCurrency(totalRevenue);
     } catch (error) {
         console.error('Error loading daily sales summary:', error);
+        showToast('Error al cargar el resumen de ventas del día', 'error');
     }
 }
 
@@ -548,14 +589,13 @@ function updateCartUI() {
     const summary = document.getElementById('cart-summary');
 
     if (cart.length === 0) {
-        container.innerHTML = '<div class="p-4 text-center text-gray-500">Agrega productos al carrito</div>';
+        container.innerHTML = '<div class="cart-empty"><span aria-hidden="true">⚽</span><strong>Tu carrito está esperando</strong><p>Agrega productos para iniciar una venta.</p></div>';
         summary.innerHTML = '';
         return;
     }
 
     container.innerHTML = cart.map(item => renderCartItem(item)).join('');
     summary.innerHTML = renderCartSummary(cart);
-
     document.getElementById('btn-checkout')?.addEventListener('click', processSale);
 }
 
@@ -565,29 +605,25 @@ async function processSale() {
     try {
         setLoading(true);
         const user = await getCurrentUser();
-        const total = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+        const total = cart.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0);
 
-        // Verify stock again
         await loadProducts();
         for (const item of cart) {
-            const p = products.find(p => p.id === item.product.id);
-            if (!p || p.stock < item.quantity) {
+            const currentProduct = products.find(product => String(product.id) === String(item.product.id));
+            if (!currentProduct || Number(currentProduct.stock) < item.quantity) {
                 showToast(`Stock insuficiente para ${item.product.name}`, 'error');
-                setLoading(false);
                 return;
             }
         }
 
-        // 1. Create Sale
         const { data: saleData, error: saleError } = await supabase
             .from('sales')
-            .insert([{ sold_by: user.id, total: total }])
+            .insert([{ sold_by: user.id, total }])
             .select()
             .single();
 
         if (saleError) throw saleError;
 
-        // 2. Create Sale Items
         const saleItems = cart.map(item => ({
             sale_id: saleData.id,
             product_id: item.product.id,
@@ -595,22 +631,18 @@ async function processSale() {
             unit_price: item.product.price,
             subtotal: item.quantity * item.product.price
         }));
-
         const { error: itemsError } = await supabase.from('sale_items').insert(saleItems);
         if (itemsError) throw itemsError;
-
-        // Note: DB trigger should handle stock reduction
 
         showToast('Venta registrada exitosamente', 'success');
         cart = [];
         updateCartUI();
         await loadProducts();
-        await loadDailySalesSummary();
-        await loadSalesHistory();
         renderInventoryGrid();
         renderPosGrid();
         checkLowStock();
-
+        await loadDailySalesSummary();
+        await loadSalesHistory();
     } catch (error) {
         console.error('Checkout error:', error);
         showToast('Error al procesar la venta', 'error');
@@ -641,7 +673,7 @@ async function loadSalesHistory() {
         document.getElementById('sales-daily-total').textContent = formatCurrency(dailyTotal);
 
         if (!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No hay ventas registradas en esta fecha.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="inventory-history-empty"><span aria-hidden="true">📭</span><strong>No hay ventas en esta fecha</strong><span>Elige otro día para consultar el historial.</span></td></tr>';
             return;
         }
 

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" fill="none">
+  <defs>
+    <linearGradient id="water" x1="73" y1="39" x2="161" y2="207" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#b9f5ff"/>
+      <stop offset=".35" stop-color="#46c9ee"/>
+      <stop offset="1" stop-color="#1262b5"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="83" y1="70" x2="119" y2="70" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#fff" stop-opacity=".7"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="120" cy="207" rx="53" ry="10" fill="#000" fill-opacity=".25"/>
+  <path d="M100 29h40v24l16 17 12 122a15 15 0 0 1-15 16H87a15 15 0 0 1-15-16L84 70l16-17V29Z" fill="url(#water)" stroke="#b9f5ff" stroke-width="4"/>
+  <path d="M100 29h40v18h-40z" fill="#236fbd" stroke="#e3fbff" stroke-width="3"/>
+  <path d="M101 53h38" stroke="#d9faff" stroke-opacity=".8" stroke-width="3"/>
+  <path d="m92 76-11 115c-1 9 3 15 11 17l14-141-14 9Z" fill="url(#glass)"/>
+  <path d="M78 106c23 8 60-8 84 0l2 51H74l4-51Z" fill="#effdff" fill-opacity=".82" stroke="#fff" stroke-width="3"/>
+  <path d="M96 131c8-14 17-19 27-15 6 3 12 8 20 17-13 14-31 15-47-2Z" fill="#32a6d8"/>
+  <path d="M107 129c9 3 17 3 25 0" stroke="#eaffff" stroke-linecap="round" stroke-width="4"/>
+  <circle cx="163" cy="91" r="5" fill="#e9fcff"/>
+  <circle cx="70" cy="83" r="4" fill="#e9fcff" opacity=".75"/>
+</svg>

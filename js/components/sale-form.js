@@ -1,21 +1,26 @@
 import { formatCurrency, escapeHtml } from '../ui.js';
+import { getProductImage } from './product-form.js';
 
 export function renderCartItem(item) {
     const subtotal = item.quantity * item.product.price;
     return `
-        <div class="p-3 flex flex-col gap-2 border-b last:border-b-0" data-product-id="${item.product.id}">
-            <div class="flex justify-between items-start">
-                <span class="font-bold text-sm">${escapeHtml(item.product.name)}</span>
-                <button class="text-red-500 hover:text-red-700 text-sm" onclick="window.removeFromCart('${item.product.id}')">✕</button>
-            </div>
-            <div class="flex justify-between items-center text-sm">
-                <span class="text-gray-600">${formatCurrency(item.product.price)} c/u</span>
-                <span class="font-bold">${formatCurrency(subtotal)}</span>
-            </div>
-            <div class="flex items-center gap-2 mt-1">
-                <button class="btn btn--sm bg-gray-200" onclick="window.updateCartQuantity('${item.product.id}', -1)">-</button>
-                <span class="w-8 text-center font-bold">${item.quantity}</span>
-                <button class="btn btn--sm bg-gray-200" onclick="window.updateCartQuantity('${item.product.id}', 1)">+</button>
+        <div class="cart-item" data-product-id="${item.product.id}">
+            <img class="cart-item__image" src="${getProductImage(item.product.name, item.product.category)}" alt="${escapeHtml(item.product.name)}" loading="lazy"
+                 onerror="this.onerror=null;this.src='img/productos/generico.svg'">
+            <div class="cart-item__content">
+                <div class="cart-item__heading">
+                    <span class="cart-item__name">${escapeHtml(item.product.name)}</span>
+                    <button class="cart-item__remove" aria-label="Quitar ${escapeHtml(item.product.name)}" onclick="window.removeFromCart('${item.product.id}')">✕</button>
+                </div>
+                <div class="cart-item__prices">
+                    <span>${formatCurrency(item.product.price)} c/u</span>
+                    <strong>${formatCurrency(subtotal)}</strong>
+                </div>
+                <div class="cart-item__quantity">
+                    <button class="btn btn--sm cart-quantity-btn" aria-label="Restar una unidad" onclick="window.updateCartQuantity('${item.product.id}', -1)">−</button>
+                    <span>${item.quantity}</span>
+                    <button class="btn btn--sm cart-quantity-btn" aria-label="Agregar una unidad" onclick="window.updateCartQuantity('${item.product.id}', 1)">＋</button>
+                </div>
             </div>
         </div>
     `;
@@ -24,9 +29,9 @@ export function renderCartItem(item) {
 export function renderCartSummary(items) {
     const total = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
     return `
-        <div class="flex justify-between items-center mb-4">
-            <span class="text-lg font-bold">Total:</span>
-            <span class="text-2xl font-bold text-green-700">${formatCurrency(total)}</span>
+        <div class="cart-total">
+            <span>Total</span>
+            <strong>${formatCurrency(total)}</strong>
         </div>
         <button id="btn-checkout" class="btn btn--primary btn--lg w-full">Registrar Venta</button>
     `;

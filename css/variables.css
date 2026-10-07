@@ -4,27 +4,33 @@
 
 :root {
   /* Colors */
-  --color-primary: #c8ff00;
-  --color-primary-dark: #111312;
-  --color-accent-yellow: #c8ff00;
-  --color-accent-orange: #e76f51;
-  
-  --color-success: #9bc900;
-  --color-warning: #d98e2b;
-  --color-danger: #d94f4f;
-  --color-info: #3c7fa3;
-  
-  --color-white: #f4f5f1;
-  --color-gray-50: #242624;
-  --color-gray-100: #E9ECEF;
-  --color-gray-200: #DEE2E6;
-  --color-gray-300: #CED4DA;
-  --color-gray-500: #6C757D;
-  --color-gray-700: #b5b8b2;
-  --color-gray-900: #f4f5f1;
+  --color-primary: #4ade80;
+  --color-primary-dark: #0a0f0c;
+  --color-accent-yellow: #86efac;
+  --color-accent-orange: #22c55e;
+
+  --color-success: #22c55e;
+  --color-warning: #f5b942;
+  --color-danger: #ef6b6b;
+  --color-info: #67b7a0;
+
+  --color-white: #f1f5f2;
+  --color-gray-50: #142019;
+  --color-gray-100: #1a2a20;
+  --color-gray-200: #294332;
+  --color-gray-300: #3a5944;
+  --color-gray-400: #64816d;
+  --color-gray-500: #8fa797;
+  --color-gray-700: #c0d0c4;
+  --color-gray-900: #f1f5f2;
+  --color-surface: #0b3d20;
+  --color-surface-raised: #10522b;
+  --color-surface-deep: #050805;
+  --color-text-muted: #a8b9ad;
 
   /* Typography */
-  --font-family: 'Trebuchet MS', 'Segoe UI', sans-serif;
+  --font-family: 'Inter', 'Segoe UI', sans-serif;
+  --font-family-display: 'Bebas Neue', 'Oswald', Impact, sans-serif;
   
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
@@ -40,6 +46,11 @@
   --font-weight-bold: 700;
 
   /* Spacing */
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
   --space-md: 1rem;
@@ -49,14 +60,14 @@
   --space-3xl: 4rem;
 
   /* Borders & Shadows */
-  --border-radius-sm: 4px;
-  --border-radius: 8px;
-  --border-radius-lg: 12px;
+  --border-radius-sm: 6px;
+  --border-radius: 12px;
+  --border-radius-lg: 18px;
   --border-radius-full: 50%;
   
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.24);
-  --shadow-md: 0 8px 22px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 18px 45px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 8px 22px rgba(0, 0, 0, 0.24), 0 0 18px rgba(34, 197, 94, 0.06);
+  --shadow-md: 0 16px 36px rgba(0, 0, 0, 0.32), 0 0 24px rgba(34, 197, 94, 0.1);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.48), 0 0 32px rgba(34, 197, 94, 0.12);
   
   /* Transitions */
   --transition-fast: 0.2s ease;
