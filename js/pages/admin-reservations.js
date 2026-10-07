@@ -6,53 +6,75 @@ let realtimeChannel = null;
 
 export async function render() {
   return `
-    <div class="page-container">
-      <h2 class="page-title">Gestión de Reservas</h2>
-      
-      <div class="admin-filters">
-        <select id="filter-type" class="form-input">
-          <option value="all">Todos los tipos</option>
-          <option value="futbol">Fútbol</option>
-          <option value="motocross">Motocross</option>
-          <option value="billar">Billar</option>
-        </select>
-        <select id="filter-status" class="form-input">
-          <option value="all">Todos los estados</option>
-          <option value="pendiente">Pendiente</option>
-          <option value="aprobada">Aprobada</option>
-          <option value="completada">Completada</option>
-          <option value="cancelada">Cancelada</option>
-        </select>
-        <button id="btn-refresh" class="btn btn--secondary">Refrescar</button>
-      </div>
+    <div class="page-container reservations-page fondo-futbol">
+      <header class="reservations-page__header">
+        <p class="reservations-page__eyebrow">SUPERGOL · ADMINISTRACIÓN</p>
+        <h1 class="page-title">GESTIÓN DE RESERVAS</h1>
+        <p class="reservations-page__intro">Administra las solicitudes y consulta el historial de actividad.</p>
+      </header>
 
-      <div class="table-responsive">
-        <table class="table" id="admin-reservations-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Espacio</th>
-              <th>Usuario / Tel</th>
-              <th>Fecha y Hora</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Data injected here -->
-          </tbody>
-        </table>
-      </div>
-
-      <section class="reservation-history">
-        <h3>Historial de reservas</h3>
+      <section class="reservations-card" aria-label="Gestión de reservas">
+        <div class="reservations-card__heading">
+          <div>
+            <h2>Reservas</h2>
+            <p>Filtra las solicitudes activas y gestiona su estado.</p>
+          </div>
+        </div>
         <div class="admin-filters">
+          <select id="filter-type" class="form-input">
+            <option value="all">Todos los tipos</option>
+            <option value="futbol">Fútbol</option>
+            <option value="motocross">Motocross</option>
+            <option value="billar">Billar</option>
+          </select>
+          <select id="filter-status" class="form-input">
+            <option value="all">Todos los estados</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="aprobada">Aprobada</option>
+            <option value="completada">Completada</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+          <button id="btn-refresh" class="btn btn--secondary">Refrescar</button>
+        </div>
+
+        <div class="reservations-table-heading">
+          <h3>Reservas registradas</h3>
+        </div>
+        <div class="table-responsive">
+          <table class="table" id="admin-reservations-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Espacio</th>
+                <th>Usuario / Tel</th>
+                <th>Fecha y Hora</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Data injected here -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="reservations-card reservation-history">
+        <header class="reservation-history__heading">
+          <p class="reservations-page__eyebrow">CONSULTA POR FECHA</p>
+          <h2>HISTORIAL DE RESERVAS</h2>
+          <p>Busca y revisa las reservas de un día específico.</p>
+        </header>
+        <div class="admin-filters reservation-history__filters">
           <div class="form-group">
             <label class="form-label" for="history-date">Fecha</label>
             <input id="history-date" class="form-input w-auto" type="date" value="${getLocalDateString()}">
           </div>
           <button id="btn-search-history" class="btn btn--primary">Buscar</button>
           <button id="btn-clear-history" class="btn btn--secondary">Limpiar</button>
+        </div>
+        <div class="reservations-table-heading reservation-history__table-heading">
+          <h3>Historial por fecha</h3>
         </div>
         <div class="table-responsive">
           <table class="table" id="admin-reservation-history-table">

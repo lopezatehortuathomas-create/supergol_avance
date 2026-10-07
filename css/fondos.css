@@ -1,0 +1,36 @@
+/* ==========================================================================
+   Fondos decorativos de fútbol
+   ========================================================================== */
+.fondo-futbol {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+}
+
+.fondo-futbol::before {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(5, 8, 5, 0.45), rgba(5, 8, 5, 0.74)),
+    url("../img/fondos/futbol.svg") center / cover no-repeat;
+  content: "";
+  pointer-events: none;
+}
+
+.fondo-futbol > * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 720px) {
+  .fondo-futbol::before {
+    background:
+      linear-gradient(180deg, rgba(5, 8, 5, 0.58), rgba(5, 8, 5, 0.82)),
+      url("../img/fondos/futbol.svg") 62% center / auto 78% no-repeat;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fondo-futbol::before { animation: none; }
+}

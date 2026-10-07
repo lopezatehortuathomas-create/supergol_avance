@@ -1,6 +1,6 @@
 import { isAdmin, signOut } from '../auth.js';
 import { navigateTo } from '../router.js';
-import { escapeHtml } from '../ui.js';
+import { escapeHtml, showToast } from '../ui.js';
 
 export function render(user) {
   if (!user) return '';
@@ -36,6 +36,7 @@ export function render(user) {
         <a href="#/" class="nav-link" data-path="#/"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1V10Z"/></svg></span>Inicio</a>
         <a href="#/reservar" class="nav-link" data-path="#/reservar"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h3M14 14h2"/></svg></span>Reservar</a>
         <a href="#/mis-reservas" class="nav-link" data-path="#/mis-reservas"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span>Mis Reservas</a>
+        <a href="#/lugar" class="nav-link" data-path="#/lugar"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span>Lugar</a>
         ${adminNav}
         
         <div class="sidebar-divider"></div>
@@ -64,8 +65,21 @@ export function init() {
   if (btnLogout) {
     btnLogout.addEventListener('click', async (e) => {
       e.preventDefault();
-      await signOut();
-      navigateTo('#/login');
+      if (btnLogout.getAttribute('aria-disabled') === 'true') return;
+      btnLogout.setAttribute('aria-disabled', 'true');
+      try {
+        const { error } = await signOut();
+        if (error) {
+          showToast(`No se pudo cerrar la sesión: ${error.message}`, 'error', 6000);
+          btnLogout.removeAttribute('aria-disabled');
+          return;
+        }
+        navigateTo('#/login');
+      } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+        showToast(`No se pudo cerrar la sesión: ${error.message || 'error desconocido'}`, 'error', 6000);
+        btnLogout.removeAttribute('aria-disabled');
+      }
     });
   }
 

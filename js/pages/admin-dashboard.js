@@ -1,6 +1,6 @@
 import { supabase } from '../supabase.js';
 import { isAdmin } from '../auth.js';
-import { showToast, setLoading, formatCurrency, renderBadge } from '../ui.js';
+import { showToast, setLoading, formatCurrency, renderBadge, escapeHtml } from '../ui.js';
 import { navigateTo } from '../router.js';
 
 export async function render() {
@@ -95,8 +95,14 @@ async function loadTopProducts() {
     if (!salesMonth || salesMonth.length === 0) {
       const chart = document.getElementById('top-products-chart');
       const labels = document.getElementById('top-products-labels');
-      if (chart) chart.innerHTML = '<div class="empty-chart-state">Sin ventas</div>';
-      if (labels) labels.innerHTML = '<span>--</span>';
+      if (chart) {
+        chart.style.removeProperty('--chart-columns');
+        chart.innerHTML = '<div class="empty-chart-state">Sin ventas</div>';
+      }
+      if (labels) {
+        labels.style.removeProperty('--chart-columns');
+        labels.innerHTML = '';
+      }
       return;
     }
 
@@ -139,15 +145,19 @@ async function loadTopProducts() {
 
     if (!entries.length) {
       chart.innerHTML = '<div class="empty-chart-state">Sin ventas</div>';
-      labels.innerHTML = '<span>--</span>';
+      chart.style.removeProperty('--chart-columns');
+      labels.style.removeProperty('--chart-columns');
+      labels.innerHTML = '';
       return;
     }
 
     const maxValue = Math.max(...entries.map(([, value]) => value), 1);
+    chart.style.setProperty('--chart-columns', entries.length);
+    labels.style.setProperty('--chart-columns', entries.length);
     chart.innerHTML = entries.map(([, value]) => `
       <i style="height: ${Math.max((value / maxValue) * 100, 12)}%"></i>
     `).join('');
-    labels.innerHTML = entries.map(([name, qty]) => `<span>${name} (${qty})</span>`).join('');
+    labels.innerHTML = entries.map(([name, qty]) => `<span title="${escapeHtml(name)}">${escapeHtml(name)} (${qty})</span>`).join('');
   } catch (error) {
     console.error('Error loading top products', error);
   }

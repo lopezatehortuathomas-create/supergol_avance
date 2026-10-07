@@ -24,6 +24,7 @@ export function render() {
                         <span>Iniciar Sesión</span>
                     </button>
                 </form>
+                <p class="login-password-reset"><a href="#/recuperar-contrasena">¿Olvidaste tu contraseña?</a></p>
                 <div class="login-footer text-center" style="margin-top: 1rem;">
                     <p><a class="auth-outline-link" href="#/register">Registrarse</a></p>
                 </div>

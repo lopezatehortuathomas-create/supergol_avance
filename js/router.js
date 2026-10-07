@@ -1,5 +1,6 @@
 import { getCurrentUser, isAdmin, onAuthStateChange } from './auth.js';
 import * as navbar from './components/navbar.js';
+import { supabase } from './supabase.js';
 import { setLoading } from './ui.js';
 
 // Configuración de rutas
@@ -7,7 +8,10 @@ const routes = new Map([
   ['#/', { module: './pages/home.js', requiresAuth: false, requiresAdmin: false, title: 'Inicio - Super Gol' }],
   ['#/login', { module: './pages/login.js', requiresAuth: false, requiresAdmin: false, title: 'Iniciar Sesión - Super Gol' }],
   ['#/register', { module: './pages/register.js', requiresAuth: false, requiresAdmin: false, title: 'Registro - Super Gol' }],
+  ['#/recuperar-contrasena', { module: './pages/password-recovery.js', requiresAuth: false, requiresAdmin: false, title: 'Recuperar contraseña - Super Gol' }],
+  ['#/cambiar-contrasena', { module: './pages/password-recovery.js', requiresAuth: false, requiresAdmin: false, title: 'Cambiar contraseña - Super Gol' }],
   ['#/guia', { module: './pages/user-guide.js', requiresAuth: false, requiresAdmin: false, title: 'Manual de usuario - Super Gol' }],
+  ['#/lugar', { module: './pages/lugar.js', requiresAuth: false, requiresAdmin: false, title: 'Lugar - Super Gol' }],
   ['#/admin/manual', { module: './pages/admin-guide.js', requiresAuth: true, requiresAdmin: true, title: 'Manual de administración - Super Gol' }],
   ['#/mis-reservas', { module: './pages/user-dashboard.js', requiresAuth: true, requiresAdmin: false, title: 'Mis Reservas - Super Gol' }],
   ['#/reservar', { module: './pages/reservations.js', requiresAuth: true, requiresAdmin: false, title: 'Reservar - Super Gol' }],
@@ -97,10 +101,36 @@ async function handleRoute() {
 export function initRouter() {
   window.addEventListener('hashchange', handleRoute);
   
-  onAuthStateChange((event, session) => {
+  onAuthStateChange((event) => {
+    if (event === 'SIGNED_OUT') {
+      navigateTo('#/login');
+      return;
+    }
+    if (event === 'PASSWORD_RECOVERY') {
+      navigateTo('#/cambiar-contrasena');
+      return;
+    }
+    if (event === 'INITIAL_SESSION' && new URLSearchParams(window.location.search).has('recovery')) return;
     // Recargar la ruta actual cuando el estado de auth cambia
     handleRoute();
   });
-  
+  if (new URLSearchParams(window.location.search).has('recovery')) {
+    supabase.auth.getSession().then(({ error }) => {
+      if (error) console.error('Error al comprobar el enlace de recuperación:', error);
+      const callbackUrl = new URL(window.location.href);
+      callbackUrl.searchParams.delete('recovery');
+      callbackUrl.searchParams.delete('code');
+      window.history.replaceState(null, '', `${callbackUrl.pathname}${callbackUrl.search}#/cambiar-contrasena`);
+      if (window.location.hash === '#/cambiar-contrasena') {
+        handleRoute();
+      } else {
+        navigateTo('#/cambiar-contrasena');
+      }
+    }).catch(error => {
+      console.error('Error al procesar el enlace de recuperación:', error);
+      navigateTo('#/cambiar-contrasena');
+    });
+    return;
+  }
   handleRoute();
 }

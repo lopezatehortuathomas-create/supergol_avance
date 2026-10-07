@@ -25,6 +25,15 @@ export async function signIn(email, password) {
   });
 }
 
+export async function requestPasswordReset(email) {
+  const redirectTo = `${window.location.origin}${window.location.pathname}?recovery=1`;
+  return await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo });
+}
+
+export async function updatePassword(password) {
+  return await supabase.auth.updateUser({ password });
+}
+
 export function getAuthErrorMessage(error, fallback) {
   const messages = {
     invalid_credentials: 'El correo o la contraseña no son correctos.',
