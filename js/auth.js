@@ -1,7 +1,8 @@
 import { supabase } from './supabase.js';
+import { APP_URL } from './config.js';
 
 function getAuthRedirectUrl() {
-  return `${window.location.origin}${window.location.pathname}`;
+  return new URL(window.location.pathname, APP_URL).toString();
 }
 
 export async function signUp(email, password, fullName, phone) {
@@ -26,7 +27,9 @@ export async function signIn(email, password) {
 }
 
 export async function requestPasswordReset(email) {
-  const redirectTo = `${window.location.origin}${window.location.pathname}?recovery=1`;
+  const redirectUrl = new URL(getAuthRedirectUrl());
+  redirectUrl.searchParams.set('recovery', '1');
+  const redirectTo = redirectUrl.toString();
   return await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo });
 }
 
