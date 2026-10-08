@@ -49,8 +49,8 @@ export function render() {
       <section class="manual-section">
         <div class="manual-section__title"><span>04</span><h2>Inventario y ventas</h2></div>
         <div class="manual-grid">
-          <article class="manual-card"><h3>Catálogo</h3><p>Busca por nombre y filtra por categoría. <strong>Agregar Producto</strong> y <strong>Editar</strong> permiten definir nombre, categoría, precio, stock actual y mínimo. <strong>Borrar</strong> desactiva el producto; no lo elimina de ventas anteriores.</p></article>
-          <article class="manual-card"><h3>Punto de venta</h3><p>Selecciona productos para agregarlos al carrito, ajusta cantidades con +/− o quita un producto. <strong>Registrar Venta</strong> confirma el cobro y descuenta el stock. El resumen muestra productos, unidades e ingresos del día.</p></article>
+          <article class="manual-card"><h3>Catálogo</h3><p>Busca por nombre y filtra por categoría. Al agregar o editar puedes definir nombre, categoría, precio, stock actual y mínimo. La imagen se sugiere según el producto; subir un archivo solo muestra una vista previa y no lo guarda. <strong>Eliminar</strong> desactiva el producto sin borrar sus ventas anteriores.</p></article>
+          <article class="manual-card"><h3>Punto de venta</h3><p>Abre la pestaña <strong>Punto de venta</strong>, selecciona productos para agregarlos al carrito, ajusta cantidades con +/− o quita un producto. <strong>Registrar Venta</strong> confirma el cobro y descuenta el stock. El resumen muestra productos, unidades e ingresos del día.</p></article>
           <article class="manual-card"><h3>Historial de ventas</h3><p>Selecciona una fecha para ver ventas, vendedor, productos y total del día. Usa <strong>Ver Detalle</strong> para consultar cantidades, precios unitarios y subtotales.</p></article>
           <article class="manual-card"><h3>Alerta de stock</h3><p>El aviso aparece cuando un producto llega al stock mínimo o queda por debajo. Actualiza el stock desde <strong>Editar</strong> después de reponerlo.</p></article>
         </div>
@@ -60,7 +60,7 @@ export function render() {
       <section class="manual-section">
         <div class="manual-section__title"><span>05</span><h2>Reportes</h2></div>
         <div class="manual-grid manual-grid--three">
-          <article class="manual-card"><h3>Elegir periodo</h3><p>Define fecha de inicio y fin. El reporte se actualiza al cambiar las fechas o al pulsar <strong>Generar Reporte</strong>.</p></article>
+          <article class="manual-card"><h3>Elegir periodo</h3><p>Define las fechas de inicio y fin, sin seleccionar días futuros. El reporte se actualiza al cambiar las fechas o al pulsar <strong>Generar Reporte</strong>.</p></article>
           <article class="manual-card"><h3>Ventas</h3><p>Consulta unidades, ingresos, gráfico de productos más vendidos y detalle por producto, categoría, unidades e ingresos.</p></article>
           <article class="manual-card"><h3>Reservas</h3><p>Compara las reservas del periodo por estado y por tipo de espacio.</p></article>
         </div>
@@ -68,7 +68,16 @@ export function render() {
       </section>
 
       <section class="manual-section">
-        <div class="manual-section__title"><span>06</span><h2>Acceso y sesión</h2></div>
+        <div class="manual-section__title"><span>06</span><h2>Información del lugar</h2></div>
+        <div class="manual-grid">
+          <article class="manual-card"><h3>Dirección del complejo</h3><p>En <strong>Lugar</strong>, actualiza la dirección y guarda los cambios. Los visitantes pueden consultarla y abrir el enlace para llegar.</p></article>
+          <article class="manual-card"><h3>Galería de fotos</h3><p>Agrega fotos JPG, PNG o WEBP de hasta 5 MB cada una. Antes de subirlas puedes revisar los archivos seleccionados; después, añade o actualiza la descripción de cada foto desde la galería.</p></article>
+        </div>
+        <p class="manual-back-link"><a href="#/lugar">Ir a Lugar</a></p>
+      </section>
+
+      <section class="manual-section">
+        <div class="manual-section__title"><span>07</span><h2>Acceso y sesión</h2></div>
         <div class="manual-actions">
           <div><strong>Herramientas de administración</strong><p>Dashboard, Gestión de Reservas, Registro de Usos, Inventario y Reportes aparecen solo con una cuenta administradora.</p></div>
           <div><strong>Manual de usuario</strong><p>El manual de usuario está disponible en el menú lateral, debajo de este manual.</p></div>

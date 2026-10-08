@@ -1,0 +1,410 @@
+/* ==========================================================================
+   MANUAL DE ADMINISTRACIÓN
+   ========================================================================== */
+
+/* Variables */
+:root {
+  --admin-guide-space-8: 8px;
+  --admin-guide-space-12: 12px;
+  --admin-guide-space-16: 16px;
+  --admin-guide-space-24: 24px;
+  --admin-guide-space-32: 32px;
+  --admin-guide-space-48: 48px;
+  --admin-guide-surface: rgba(8, 23, 13, 0.94);
+  --admin-guide-card: rgba(16, 82, 43, 0.36);
+  --admin-guide-border: rgba(134, 239, 172, 0.2);
+  --admin-guide-text: #dfeae3;
+  --admin-guide-muted: #c0d0c4;
+  --admin-guide-green: #86efac;
+}
+
+/* Base and football background */
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) {
+  background: #050805;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"])::before {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  background:
+    url("../img/fondos/futbol.svg") left -310px top 4% / 580px 363px no-repeat,
+    url("../img/fondos/futbol.svg") right -320px bottom -120px / 580px 363px no-repeat;
+  content: "";
+  opacity: 0.07;
+  pointer-events: none;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .main-content {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  background: transparent;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-page {
+  width: min(100%, 1160px);
+  max-width: none;
+  padding: var(--admin-guide-space-32) clamp(var(--admin-guide-space-16), 3vw, var(--admin-guide-space-32)) var(--admin-guide-space-48);
+  margin: 0 auto;
+  color: var(--admin-guide-text);
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-page :focus-visible {
+  outline: 3px solid var(--admin-guide-green);
+  outline-offset: 3px;
+}
+
+/* Header */
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: clamp(var(--admin-guide-space-24), 5vw, var(--admin-guide-space-48));
+  margin-bottom: var(--admin-guide-space-48);
+  border: 1px solid rgba(134, 239, 172, 0.28);
+  border-radius: 20px;
+  background: linear-gradient(125deg, rgba(16, 82, 43, 0.96), rgba(5, 17, 9, 0.98) 76%);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.32), 0 0 32px rgba(34, 197, 94, 0.08);
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-hero::after {
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  right: -25px;
+  width: clamp(150px, 23vw, 280px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(134, 239, 172, 0.14);
+  border-radius: 50%;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 1px), rgba(134, 239, 172, 0.12) 50%, transparent calc(50% + 1px)),
+    linear-gradient(0deg, transparent calc(50% - 1px), rgba(134, 239, 172, 0.12) 50%, transparent calc(50% + 1px));
+  box-shadow: inset 0 0 0 28px transparent, inset 0 0 0 29px rgba(134, 239, 172, 0.1);
+  content: "";
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-hero > * {
+  position: relative;
+  z-index: 1;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-hero .eyebrow {
+  margin: 0 0 var(--admin-guide-space-12);
+  color: #b8f4ca;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-hero h1 {
+  max-width: 16ch;
+  margin: 0;
+  color: #f1f5f2;
+  font-family: var(--font-family-display);
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 400;
+  letter-spacing: 0.055em;
+  line-height: 0.98;
+  text-transform: uppercase;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-hero > p:last-child {
+  max-width: 68ch;
+  margin: var(--admin-guide-space-16) 0 0;
+  color: #e2f1e6;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* Section headings */
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-section {
+  margin: 0 0 var(--admin-guide-space-48);
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-section__title {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--admin-guide-space-16);
+  padding: 0 0 var(--admin-guide-space-16);
+  margin: 0 0 var(--admin-guide-space-24);
+  border-bottom: 1px solid rgba(134, 239, 172, 0.15);
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-section__title::after {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: min(180px, 32%);
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #4ade80, rgba(74, 222, 128, 0));
+  content: "";
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-section__title > span {
+  display: inline-grid;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid rgba(134, 239, 172, 0.68);
+  border-radius: 50%;
+  background: #86efac;
+  color: #07130b;
+  font-family: var(--font-family-display);
+  font-size: 1.15rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-section__title h2 {
+  margin: 0;
+  color: #f1f5f2;
+  font-family: var(--font-family-display);
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 400;
+  letter-spacing: 0.055em;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+/* Cards and grids */
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-grid,
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-grid--three,
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  align-items: start;
+  gap: var(--admin-guide-space-16);
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-card,
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-actions > div {
+  min-width: 0;
+  min-height: 0;
+  padding: var(--admin-guide-space-24);
+  border: 1px solid var(--admin-guide-border);
+  border-radius: 16px;
+  background: var(--admin-guide-card);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-card:hover,
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-actions > div:hover {
+  border-color: rgba(134, 239, 172, 0.34);
+  background: rgba(16, 82, 43, 0.46);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.24), 0 0 20px rgba(34, 197, 94, 0.07);
+  transform: translateY(-2px);
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-card__icon {
+  display: inline-grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  margin: 0 0 var(--admin-guide-space-16);
+  border: 1px solid rgba(134, 239, 172, 0.3);
+  border-radius: 50%;
+  background: rgba(6, 34, 17, 0.82);
+  color: #86efac;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-card h3,
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-actions > div > strong {
+  display: block;
+  margin: 0;
+  color: #f1f5f2;
+  font-family: var(--font-family-display);
+  font-size: 1.35rem;
+  font-weight: 400;
+  letter-spacing: 0.045em;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-card p,
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-actions p {
+  max-width: 72ch;
+  margin: var(--admin-guide-space-12) 0 0;
+  color: var(--admin-guide-text);
+  font-size: 0.96rem;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-card strong,
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-actions p strong {
+  color: #86efac;
+  font-size: inherit;
+  font-weight: 650;
+}
+
+/* Links and buttons */
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-page a,
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-page a:visited {
+  color: #4ade80;
+  text-decoration-color: rgba(74, 222, 128, 0.7);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-actions a:hover,
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-actions a:active {
+  color: #b8f4ca;
+  text-decoration-color: currentColor;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-page a:focus-visible {
+  border-radius: 4px;
+  outline: 3px solid #86efac;
+  outline-offset: 3px;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-section > .manual-back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--admin-guide-space-8);
+  min-height: 44px;
+  padding: 10px 16px;
+  margin: var(--admin-guide-space-24) 0 0;
+  border: 1px solid rgba(134, 239, 172, 0.56);
+  border-radius: 999px;
+  background: rgba(5, 18, 9, 0.5);
+  color: #86efac;
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-section > .manual-back-link::after {
+  content: "→";
+  transition: transform 180ms ease;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-section > .manual-back-link:hover {
+  border-color: #86efac;
+  background: #86efac;
+  color: #07130b;
+  text-decoration: none;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-section > .manual-back-link:hover::after {
+  transform: translateX(3px);
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-page > .manual-back-link {
+  display: flex;
+  width: fit-content;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 20px;
+  margin: 0 auto;
+  border: 1px solid #4ade80;
+  border-radius: 999px;
+  background: #4ade80;
+  color: #07130b;
+  font-size: 0.92rem;
+  font-weight: 750;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-page > a.manual-back-link:link,
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-page > a.manual-back-link:visited,
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-page > a.manual-back-link:hover,
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-page > a.manual-back-link:active {
+  color: #07130b;
+}
+
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-page > .manual-back-link:hover,
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-page > .manual-back-link:active {
+  border-color: #86efac;
+  background: #86efac;
+  color: #07130b;
+  box-shadow: 0 8px 22px rgba(34, 197, 94, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Sidebar: keep only the active admin-guide item within its row */
+body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .sidebar .nav-link.active[data-path="#/admin/manual"] {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding-right: 0.65rem;
+  padding-left: 0.65rem;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  transform: none;
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+  body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-page {
+    padding: var(--admin-guide-space-24) var(--admin-guide-space-16) var(--admin-guide-space-32);
+  }
+
+  body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-hero {
+    padding: var(--admin-guide-space-24);
+    margin-bottom: var(--admin-guide-space-32);
+  }
+
+  body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-section {
+    margin-bottom: var(--admin-guide-space-32);
+  }
+
+  body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-section__title {
+    gap: var(--admin-guide-space-12);
+    margin-bottom: var(--admin-guide-space-16);
+  }
+
+  body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-section__title > span {
+    flex-basis: 40px;
+    width: 40px;
+    height: 40px;
+  }
+
+  body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-card,
+  body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-actions > div {
+    padding: var(--admin-guide-space-16);
+  }
+
+  body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .user-guide-hero::after {
+    right: -85px;
+    opacity: 0.7;
+  }
+
+  body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-section > .manual-back-link {
+    margin-top: var(--admin-guide-space-16);
+  }
+}
+
+@media (max-width: 560px) {
+  body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-grid,
+  body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-grid--three,
+  body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) .manual-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) *,
+  body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) *::before,
+  body:has(.sidebar .nav-link.active[data-path="#/admin/manual"]) *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

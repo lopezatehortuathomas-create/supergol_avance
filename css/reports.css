@@ -1,0 +1,669 @@
+/* ==========================================================================
+   REPORTES - presentación aislada, sin dependencias de la lógica del reporte
+   ========================================================================== */
+
+/* Variables */
+:root {
+  --report-space-8: 8px;
+  --report-space-12: 12px;
+  --report-space-16: 16px;
+  --report-space-24: 24px;
+  --report-space-32: 32px;
+  --report-space-48: 48px;
+  --report-surface: rgba(8, 20, 12, 0.96);
+  --report-border: rgba(134, 239, 172, 0.18);
+  --report-text: #e6f0e9;
+  --report-muted: #a8b9ad;
+  --report-green: #86efac;
+}
+
+/* Base */
+body:has(#btn-generate-report) {
+  background: #101510;
+}
+
+body:has(#btn-generate-report)::before {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  background:
+    url("../img/fondos/futbol.svg") left -250px top 6% / 600px 375px no-repeat,
+    url("../img/fondos/futbol.svg") right -270px bottom -110px / 600px 375px no-repeat;
+  content: "";
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+body:has(#btn-generate-report) .main-content {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  background: transparent;
+}
+
+body:has(#btn-generate-report) #app {
+  min-width: 0;
+}
+
+body:has(#btn-generate-report) :focus-visible {
+  outline: 3px solid var(--report-green);
+  outline-offset: 3px;
+}
+
+/* Layout */
+.page-container:has(#btn-generate-report) {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "title"
+    "filters"
+    "sales-title"
+    "metrics"
+    "products-title"
+    "chart"
+    "reservations"
+    "detail";
+  gap: var(--report-space-32);
+  width: min(100%, 1100px);
+  padding: var(--report-space-32) clamp(var(--report-space-16), 3vw, var(--report-space-32)) var(--report-space-48);
+  margin: 0 auto;
+}
+
+.page-container:has(#btn-generate-report) > .page-header {
+  display: contents;
+}
+
+.page-container:has(#btn-generate-report) > .page-header h2 {
+  grid-area: title;
+  justify-self: center;
+  margin: 0;
+  color: #f1fff4;
+  font-family: var(--font-family-display);
+  font-size: clamp(2.7rem, 5vw, 3.8rem);
+  letter-spacing: 0.065em;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.page-container:has(#btn-generate-report) > .page-header > div {
+  grid-area: filters;
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--report-space-16);
+  width: 100%;
+  min-width: 0;
+  padding: var(--report-space-24);
+  border: 1px solid var(--report-border);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(10, 30, 17, 0.97), var(--report-surface));
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.28), 0 0 24px rgba(34, 197, 94, 0.06);
+}
+
+.page-container:has(#btn-generate-report) > .grid {
+  display: contents;
+}
+
+.page-container:has(#btn-generate-report) > .grid > div {
+  display: contents;
+}
+
+.page-container:has(#btn-generate-report) > .grid > div:first-child > .card {
+  display: contents;
+}
+
+.page-container:has(#btn-generate-report) > .grid > div:first-child > .card > .card__header {
+  grid-area: sales-title;
+}
+
+.page-container:has(#btn-generate-report) > .grid > div:first-child > .card > .card__body {
+  display: contents;
+}
+
+.page-container:has(#btn-generate-report) > .grid > div:first-child > .card > .card__body > .grid {
+  grid-area: metrics;
+}
+
+.page-container:has(#btn-generate-report) > .grid > div:first-child > .card > .card__body > h4 {
+  grid-area: products-title;
+}
+
+.page-container:has(#btn-generate-report) #sales-chart-container {
+  grid-area: chart;
+}
+
+.page-container:has(#btn-generate-report) > .grid > div:last-child > .card {
+  grid-area: reservations;
+}
+
+.page-container:has(#btn-generate-report) > .card {
+  grid-area: detail;
+}
+
+/* Components */
+.page-container:has(#btn-generate-report) .card,
+.page-container:has(#btn-generate-report) .stat-card,
+.page-container:has(#btn-generate-report) > .page-header > div {
+  border: 1px solid var(--report-border);
+  border-radius: 16px;
+  background: linear-gradient(145deg, rgba(10, 30, 17, 0.97), var(--report-surface));
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.28), 0 0 24px rgba(34, 197, 94, 0.06);
+}
+
+.page-container:has(#btn-generate-report) .card {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--report-text);
+}
+
+.page-container:has(#btn-generate-report) .card__header {
+  padding: var(--report-space-24);
+  border-bottom: 1px solid rgba(134, 239, 172, 0.14);
+  text-align: center;
+}
+
+.page-container:has(#btn-generate-report) .card__header h3 {
+  margin: 0;
+  color: #effff2;
+  font-family: var(--font-family-display);
+  font-size: 1.8rem;
+  letter-spacing: 0.065em;
+  line-height: 1.15;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.page-container:has(#btn-generate-report) .card__body {
+  min-width: 0;
+  padding: var(--report-space-24);
+}
+
+.page-container:has(#btn-generate-report) input[type="date"] {
+  position: relative;
+  flex: 0 1 220px;
+  width: 220px;
+  height: 50px;
+  min-height: 50px;
+  max-height: 50px;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 10px 38px 10px 12px;
+  margin-top: 0;
+  border: 1px solid rgba(168, 185, 173, 0.34);
+  border-radius: 10px;
+  background: rgba(3, 10, 5, 0.86);
+  color: #f1f5f2;
+  color-scheme: dark;
+  transition: border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.page-container:has(#btn-generate-report) input[type="date"]:focus {
+  border-color: #4ade80;
+  background: rgba(3, 10, 5, 0.97);
+  box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.16), 0 0 18px rgba(74, 222, 128, 0.08);
+  outline: none;
+}
+
+.page-container:has(#btn-generate-report) input[type="date"]::-webkit-calendar-picker-indicator {
+  position: relative;
+  z-index: 1;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  filter: invert(82%) sepia(29%) saturate(660%) hue-rotate(79deg) brightness(102%);
+  opacity: 1;
+  cursor: pointer;
+}
+
+.page-container:has(#btn-generate-report) .page-header label {
+  display: flex;
+  flex: 0 1 220px;
+  flex-direction: column;
+  min-width: 200px;
+  height: auto;
+  align-self: end;
+  gap: var(--report-space-8);
+  color: #dce9df;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.page-container:has(#btn-generate-report) .page-header label span {
+  color: #b8cabe;
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+
+.page-container:has(#btn-generate-report) .btn {
+  flex: 0 0 auto;
+  height: 50px;
+  min-height: 50px;
+  max-height: 50px;
+  box-sizing: border-box;
+  padding: 10px 20px;
+  border: 1px solid #4ade80;
+  border-radius: 10px;
+  background: #4ade80;
+  color: #07130b;
+  font-size: 0.9rem;
+  font-weight: 750;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 180ms ease, background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.page-container:has(#btn-generate-report) .btn:hover:not(:disabled) {
+  border-color: #86efac;
+  background: #86efac;
+  box-shadow: 0 8px 22px rgba(34, 197, 94, 0.2);
+  transform: translateY(-1px);
+}
+
+.page-container:has(#btn-generate-report) .btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Reports page */
+.page-container:has(#btn-generate-report) > .grid > div:first-child > .card > .card__header {
+  padding: var(--report-space-24);
+  border: 1px solid var(--report-border);
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(145deg, rgba(10, 30, 17, 0.97), var(--report-surface));
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.28), 0 0 24px rgba(34, 197, 94, 0.06);
+}
+
+.page-container:has(#btn-generate-report) > .grid > div:first-child > .card > .card__body > .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: var(--report-space-16);
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--report-space-24);
+  border: 1px solid var(--report-border);
+  border-top: 0;
+  border-bottom: 0;
+  background: linear-gradient(145deg, rgba(10, 30, 17, 0.97), var(--report-surface));
+}
+
+.page-container:has(#btn-generate-report) .stat-card {
+  display: flex;
+  min-width: 0;
+  min-height: 140px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--report-space-8);
+  padding: var(--report-space-24);
+  text-align: center;
+}
+
+.page-container:has(#btn-generate-report) .stat-card::before {
+  display: block;
+  width: 32px;
+  height: 32px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  content: "";
+}
+
+.page-container:has(#btn-generate-report) .stat-card:nth-child(1)::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2386efac' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7h16l-1 14H5L4 7Zm4 0V5a4 4 0 0 1 8 0v2M9 11v2m6-2v2'/%3E%3C/svg%3E");
+}
+
+.page-container:has(#btn-generate-report) .stat-card:nth-child(2)::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2386efac' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2v20m5-16H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'/%3E%3C/svg%3E");
+}
+
+.page-container:has(#btn-generate-report) .stat-card > .text-sm {
+  color: var(--report-muted);
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.035em;
+}
+
+.page-container:has(#btn-generate-report) .stat-card > #stat-total-products,
+.page-container:has(#btn-generate-report) .stat-card > #stat-total-revenue {
+  color: var(--report-green);
+  font-family: var(--font-family-display);
+  font-size: clamp(2.2rem, 4vw, 2.8rem);
+  font-weight: 400;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.page-container:has(#btn-generate-report) > .grid > div:first-child > .card > .card__body > h4 {
+  padding: var(--report-space-24) var(--report-space-32);
+  margin: 0;
+  border: 1px solid var(--report-border);
+  border-top: 0;
+  border-bottom: 0;
+  background: linear-gradient(145deg, rgba(10, 30, 17, 0.97), var(--report-surface));
+  color: #effff2;
+  font-family: var(--font-family-display);
+  font-size: 1.8rem;
+  letter-spacing: 0.065em;
+  line-height: 1.15;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.page-container:has(#btn-generate-report) #sales-chart-container {
+  position: relative;
+  width: 100% !important;
+  height: 300px !important;
+  min-height: 300px;
+  max-height: 300px;
+  margin-top: 0;
+  padding: var(--report-space-8) var(--report-space-16) var(--report-space-16);
+  overflow: hidden;
+  border: 1px solid var(--report-border);
+  border-top: 0;
+  border-radius: 0 0 16px 16px;
+  background: linear-gradient(145deg, rgba(10, 30, 17, 0.97), var(--report-surface));
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.28), 0 0 24px rgba(34, 197, 94, 0.06);
+}
+
+.page-container:has(#btn-generate-report) #sales-chart-container canvas {
+  display: block;
+  max-width: 100%;
+  height: 300px !important;
+}
+
+.page-container:has(#btn-generate-report) #sales-chart-container > div {
+  display: grid;
+  place-content: center;
+  gap: var(--report-space-8);
+  height: 100%;
+  color: #c3d3c7;
+  font-size: 0.94rem;
+  text-align: center;
+}
+
+.page-container:has(#btn-generate-report) #sales-chart-container > div::before {
+  color: rgba(134, 239, 172, 0.25);
+  content: "⚽";
+  font-size: 2.8rem;
+  line-height: 1;
+}
+
+.page-container:has(#btn-generate-report) > .grid > div:last-child > .card > .card__header {
+  padding-bottom: var(--report-space-16);
+}
+
+.page-container:has(#btn-generate-report) #reservations-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: var(--report-space-16);
+}
+
+.page-container:has(#btn-generate-report) #reservations-summary > div {
+  min-width: 0;
+  min-height: 150px;
+  padding: var(--report-space-16);
+  border: 1px solid rgba(134, 239, 172, 0.14);
+  border-radius: 12px;
+  background: rgba(3, 10, 5, 0.42);
+}
+
+.page-container:has(#btn-generate-report) #reservations-summary > p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--report-muted);
+  text-align: center;
+}
+
+.page-container:has(#btn-generate-report) #reservations-summary h5 {
+  margin: 0 0 var(--report-space-12);
+  color: var(--report-green);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.page-container:has(#btn-generate-report) #reservations-summary ul {
+  display: grid;
+  gap: var(--report-space-8);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.page-container:has(#btn-generate-report) #reservations-summary li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--report-space-12);
+  padding: var(--report-space-8) 0;
+  border-bottom: 1px solid rgba(168, 185, 173, 0.13);
+  color: #dce9df;
+  text-transform: capitalize;
+}
+
+.page-container:has(#btn-generate-report) #reservations-summary li:last-child {
+  border-bottom: 0;
+}
+
+.page-container:has(#btn-generate-report) #reservations-summary li span:last-child {
+  flex: 0 0 auto;
+  color: var(--report-green);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.page-container:has(#btn-generate-report) > .card > .card__body {
+  padding: var(--report-space-24);
+}
+
+.page-container:has(#btn-generate-report) .table-responsive {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--report-border);
+  border-radius: 12px;
+  scrollbar-color: #14532d #050805;
+  scrollbar-width: thin;
+}
+
+.page-container:has(#btn-generate-report) .table {
+  width: 100%;
+  min-width: 620px;
+  color: var(--report-text);
+}
+
+.page-container:has(#btn-generate-report) .table th,
+.page-container:has(#btn-generate-report) .table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(168, 185, 173, 0.13);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.page-container:has(#btn-generate-report) .table thead tr,
+.page-container:has(#btn-generate-report) .table th {
+  background: #0b3d20;
+}
+
+.page-container:has(#btn-generate-report) .table th {
+  color: #effff2;
+  font-size: 0.7rem;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.page-container:has(#btn-generate-report) .table th:nth-child(4),
+.page-container:has(#btn-generate-report) .table td:nth-child(4),
+.page-container:has(#btn-generate-report) .table th:nth-child(5),
+.page-container:has(#btn-generate-report) .table td:nth-child(5) {
+  width: 18%;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.page-container:has(#btn-generate-report) .table tbody tr:nth-child(even) {
+  background: rgba(16, 82, 43, 0.14);
+}
+
+.page-container:has(#btn-generate-report) .table tbody tr:hover {
+  background: rgba(74, 222, 128, 0.09);
+}
+
+.page-container:has(#btn-generate-report) .table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.page-container:has(#btn-generate-report) #report-products-table {
+  counter-reset: report-rank;
+}
+
+.page-container:has(#btn-generate-report) #report-products-table tr:not(:has(td[colspan])) {
+  counter-increment: report-rank;
+}
+
+.page-container:has(#btn-generate-report) #report-products-table tr:not(:has(td[colspan])) td:first-child {
+  width: 64px;
+  color: transparent;
+  font-size: 0;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.page-container:has(#btn-generate-report) #report-products-table tr:not(:has(td[colspan])) td:first-child::before {
+  display: inline-grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid rgba(134, 239, 172, 0.22);
+  border-radius: 50%;
+  background: rgba(11, 61, 32, 0.44);
+  color: #dfffea;
+  content: counter(report-rank);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.page-container:has(#btn-generate-report) #report-products-table tr:nth-child(1):not(:has(td[colspan])) td:first-child::before {
+  border-color: rgba(245, 210, 120, 0.66);
+  background: rgba(245, 210, 120, 0.19);
+  color: #ffe9a9;
+}
+
+.page-container:has(#btn-generate-report) #report-products-table tr:nth-child(2):not(:has(td[colspan])) td:first-child::before {
+  border-color: rgba(203, 213, 225, 0.64);
+  background: rgba(203, 213, 225, 0.16);
+  color: #e4ebf2;
+}
+
+.page-container:has(#btn-generate-report) #report-products-table tr:nth-child(3):not(:has(td[colspan])) td:first-child::before {
+  border-color: rgba(205, 150, 112, 0.64);
+  background: rgba(205, 150, 112, 0.16);
+  color: #edc2a2;
+}
+
+.page-container:has(#btn-generate-report) #report-products-table td[colspan] {
+  padding: var(--report-space-32) var(--report-space-16);
+  color: #bdcabe;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+.page-container:has(#btn-generate-report) #report-products-table td[colspan]::before {
+  display: block;
+  margin-bottom: var(--report-space-8);
+  color: rgba(134, 239, 172, 0.25);
+  content: "⚽";
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+/* Responsive */
+@media (max-width: 760px) {
+  .page-container:has(#btn-generate-report) {
+    padding: var(--report-space-24) var(--report-space-16) var(--report-space-32);
+  }
+
+  .page-container:has(#btn-generate-report) > .page-header > div {
+    align-items: center;
+  }
+
+  .page-container:has(#btn-generate-report) .page-header label {
+    flex-basis: 220px;
+  }
+}
+
+@media (max-width: 560px) {
+  .page-container:has(#btn-generate-report) > .page-header h2 {
+    font-size: 2.7rem;
+  }
+
+  .page-container:has(#btn-generate-report) > .page-header > div {
+    align-items: stretch;
+    flex-direction: column;
+    gap: var(--report-space-16);
+    padding: var(--report-space-16);
+  }
+
+  .page-container:has(#btn-generate-report) .page-header label,
+  .page-container:has(#btn-generate-report) input[type="date"],
+  .page-container:has(#btn-generate-report) #btn-generate-report {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: none;
+  }
+
+  .page-container:has(#btn-generate-report) input[type="date"],
+  .page-container:has(#btn-generate-report) #btn-generate-report {
+    height: 50px;
+    min-height: 50px;
+    max-height: 50px;
+  }
+
+  .page-container:has(#btn-generate-report) .page-header label {
+    min-width: 0;
+  }
+
+  .page-container:has(#btn-generate-report) > .grid > div:first-child > .card > .card__body > .grid {
+    grid-template-columns: minmax(0, 1fr);
+    padding: var(--report-space-16);
+  }
+
+  .page-container:has(#btn-generate-report) .stat-card {
+    min-height: 145px;
+  }
+
+  .page-container:has(#btn-generate-report) #reservations-summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .page-container:has(#btn-generate-report) .card__body {
+    padding: var(--report-space-16);
+  }
+
+  .page-container:has(#btn-generate-report) #sales-chart-container {
+    height: 300px !important;
+    min-height: 300px;
+  }
+
+  body:has(#btn-generate-report)::before {
+    background: url("../img/fondos/futbol.svg") right -350px top 8% / 500px 312px no-repeat;
+    opacity: 0.7;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body:has(#btn-generate-report) *,
+  body:has(#btn-generate-report) *::before,
+  body:has(#btn-generate-report) *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -108,16 +108,25 @@ export async function init() {
     }
 }
 
-async function handleDateFilterChange() {
+async function handleDateFilterChange(event) {
     const startInput = document.getElementById('report-start');
     const endInput = document.getElementById('report-end');
 
     if (!startInput.value && !endInput.value) return;
 
+    const editedInput = event.currentTarget;
+    const today = getLocalDateString(new Date());
+    if (editedInput.value > today) {
+        showToast('No puedes seleccionar una fecha futura.', 'warning');
+        editedInput.value = today;
+    }
+
     if (startInput.value && endInput.value && startInput.value > endInput.value) {
-        const temp = startInput.value;
-        startInput.value = endInput.value;
-        endInput.value = temp;
+        if (event.currentTarget === startInput) {
+            endInput.value = startInput.value;
+        } else {
+            startInput.value = endInput.value;
+        }
     }
 
     await generateReports();

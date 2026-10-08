@@ -11,7 +11,7 @@ export function renderBarChart(containerId, data, options = {}) {
 
     const {
         horizontal = true,
-        barColor = '#2D6A4F',
+        barColor = '#22c55e',
         height = 300
     } = options;
 
@@ -49,7 +49,7 @@ export function renderBarChart(containerId, data, options = {}) {
                 const barWidth = (item.value / maxValue) * barMaxWidth;
 
                 // Draw label
-                ctx.fillStyle = '#333';
+                ctx.fillStyle = '#e6f2ea';
                 ctx.textAlign = 'right';
                 ctx.fillText(item.label.substring(0, 15) + (item.label.length > 15 ? '...' : ''), labelWidth - 10, y + barHeight / 2);
 
@@ -60,7 +60,7 @@ export function renderBarChart(containerId, data, options = {}) {
                 ctx.fill();
 
                 // Draw value
-                ctx.fillStyle = '#666';
+                ctx.fillStyle = '#4ade80';
                 ctx.textAlign = 'left';
                 ctx.fillText(item.value.toString(), labelWidth + barWidth + 10, y + barHeight / 2);
             });
