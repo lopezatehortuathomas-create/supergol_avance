@@ -1,4 +1,4 @@
-import { getCurrentUser, isAdmin } from '../auth.js';
+﻿import { getCurrentUser, isAdmin } from '../auth.js';
 import { supabase } from '../supabase.js';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../config.js';
 import { escapeHtml, showConfirm, showToast } from '../ui.js';
@@ -29,25 +29,25 @@ export function render() {
   return `
     <main class="page-container lugar-page">
       <header class="lugar-page__header">
-        <p class="lugar-page__eyebrow">SUPERGOL · CONÓCENOS</p>
+        <p class="lugar-page__eyebrow">SUPERGOL Â· CONÃ“CENOS</p>
         <h1>LUGAR</h1>
-        <p>Conoce el complejo y encuentra cómo llegar.</p>
+        <p>Conoce el complejo y encuentra cÃ³mo llegar.</p>
       </header>
-      <section id="lugar-admin" aria-label="Administración de Lugar"></section>
+      <section id="lugar-admin" aria-label="AdministraciÃ³n de Lugar"></section>
       <section class="lugar-address" aria-labelledby="lugar-address-title">
         <div class="lugar-address__content">
           <span class="lugar-address__icon">${pinIcon}</span>
           <div>
-            <h2 id="lugar-address-title">Dirección</h2>
-            <p id="lugar-address-text" class="lugar-address__text lugar-address__empty">Cargando dirección...</p>
+            <h2 id="lugar-address-title">DirecciÃ³n</h2>
+            <p id="lugar-address-text" class="lugar-address__text lugar-address__empty">Cargando direcciÃ³n...</p>
           </div>
         </div>
-        <a id="lugar-directions" class="btn btn--primary" href="#" target="_blank" rel="noopener noreferrer" hidden>Cómo llegar</a>
+        <a id="lugar-directions" class="btn btn--primary" href="#" target="_blank" rel="noopener noreferrer" hidden>CÃ³mo llegar</a>
         <div id="lugar-address-admin"></div>
       </section>
       <section aria-label="Fotos del complejo">
         <div id="lugar-gallery" class="lugar-gallery" aria-live="polite">
-          <div class="lugar-loading" role="status"><span class="lugar-loading__ball" aria-hidden="true">⚽</span><span>Cargando fotos del complejo...</span></div>
+          <div class="lugar-loading" role="status"><span class="lugar-loading__ball" aria-hidden="true">âš½</span><span>Cargando fotos del complejo...</span></div>
         </div>
       </section>
     </main>
@@ -92,11 +92,11 @@ export async function init() {
     .maybeSingle();
 
   if (photosError || infoError) {
-    const message = [photosError?.message, infoError?.message].filter(Boolean).join(' · ');
+    const message = [photosError?.message, infoError?.message].filter(Boolean).join(' Â· ');
     console.error('Error al cargar Lugar:', message);
-    document.getElementById('lugar-gallery').innerHTML = `<div class="lugar-error" role="alert">No se pudo cargar la información del lugar. ${escapeHtml(message)}</div>`;
-    document.getElementById('lugar-address-text').textContent = 'No se pudo cargar la dirección.';
-    showToast('No se pudo cargar la información de Lugar', 'error');
+    document.getElementById('lugar-gallery').innerHTML = `<div class="lugar-error" role="alert">No se pudo cargar la informaciÃ³n del lugar. ${escapeHtml(message)}</div>`;
+    document.getElementById('lugar-address-text').textContent = 'No se pudo cargar la direcciÃ³n.';
+    showToast('No se pudo cargar la informaciÃ³n de Lugar', 'error');
     return;
   }
 
@@ -111,13 +111,13 @@ function renderAdminControls() {
     <section class="lugar-admin" aria-labelledby="lugar-admin-title">
       <div class="lugar-admin__heading">
         <h2 id="lugar-admin-title">Administrar fotos</h2>
-        <p>Sube imágenes JPG, PNG o WEBP de hasta 5 MB cada una.</p>
+        <p>Sube imÃ¡genes JPG, PNG o WEBP de hasta 5 MB cada una.</p>
       </div>
       <input id="lugar-file-input" class="lugar-file-input" type="file" accept="image/jpeg,image/png,image/webp" multiple aria-label="Seleccionar fotos del complejo">
       <div id="lugar-upload-zone" class="lugar-upload-zone">
-        <span class="lugar-upload-zone__icon" aria-hidden="true">⇧</span>
-        <strong>Arrastra tus fotos aquí</strong>
-        <span class="lugar-upload-zone__hint">También puedes elegir varios archivos desde tu dispositivo.</span>
+        <span class="lugar-upload-zone__icon" aria-hidden="true">â‡§</span>
+        <strong>Arrastra tus fotos aquÃ­</strong>
+        <span class="lugar-upload-zone__hint">TambiÃ©n puedes elegir varios archivos desde tu dispositivo.</span>
         <div class="lugar-upload-zone__actions">
           <button id="lugar-add-photos" type="button" class="btn btn--secondary">Agregar fotos</button>
           <button id="lugar-upload-photos" type="button" class="btn btn--primary" hidden disabled>Subir fotos</button>
@@ -132,7 +132,7 @@ function renderAdminControls() {
 function renderAddress(address, admin) {
   const addressText = document.getElementById('lugar-address-text');
   const directions = document.getElementById('lugar-directions');
-  addressText.textContent = address || 'Pronto compartiremos la dirección de nuestro lugar.';
+  addressText.textContent = address || 'Pronto compartiremos la direcciÃ³n de nuestro lugar.';
   addressText.classList.toggle('lugar-address__empty', !address);
   if (address) {
     directions.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
@@ -143,10 +143,10 @@ function renderAddress(address, admin) {
   document.getElementById('lugar-address-admin').innerHTML = admin ? `
     <form id="lugar-address-form" class="lugar-address__admin">
       <div class="form-group">
-        <label class="form-label" for="lugar-address-input">Editar dirección</label>
-        <input id="lugar-address-input" class="form-input" type="text" maxlength="500" value="${escapeAttribute(address)}" placeholder="Escribe la dirección del complejo">
+        <label class="form-label" for="lugar-address-input">Editar direcciÃ³n</label>
+        <input id="lugar-address-input" class="form-input" type="text" maxlength="500" value="${escapeAttribute(address)}" placeholder="Escribe la direcciÃ³n del complejo">
       </div>
-      <button class="btn btn--secondary" type="submit">Guardar dirección</button>
+      <button class="btn btn--secondary" type="submit">Guardar direcciÃ³n</button>
     </form>
   ` : '';
 
@@ -159,7 +159,7 @@ function renderAddress(address, admin) {
 function renderGallery() {
   const gallery = document.getElementById('lugar-gallery');
   if (!photos.length) {
-    gallery.innerHTML = `<div class="lugar-empty"><span class="lugar-empty__icon" aria-hidden="true">⚽</span><strong>Pronto compartiremos fotos de nuestro lugar</strong><span>Vuelve pronto para conocer el complejo.</span></div>`;
+    gallery.innerHTML = `<div class="lugar-empty"><span class="lugar-empty__icon" aria-hidden="true">âš½</span><strong>Pronto compartiremos fotos de nuestro lugar</strong><span>Vuelve pronto para conocer el complejo.</span></div>`;
     return;
   }
 
@@ -171,8 +171,8 @@ function renderGallery() {
       ${photo.descripcion ? `<p class="lugar-photo__caption">${escapeHtml(photo.descripcion)}</p>` : ''}
       ${isAdminView ? `
         <div class="lugar-photo__admin">
-          <label class="sr-only" for="lugar-caption-${escapeAttribute(photo.id)}">Descripción de la foto</label>
-          <input id="lugar-caption-${escapeAttribute(photo.id)}" class="form-input" type="text" maxlength="250" value="${escapeAttribute(photo.descripcion || '')}" placeholder="Descripción opcional">
+          <label class="sr-only" for="lugar-caption-${escapeAttribute(photo.id)}">DescripciÃ³n de la foto</label>
+          <input id="lugar-caption-${escapeAttribute(photo.id)}" class="form-input" type="text" maxlength="250" value="${escapeAttribute(photo.descripcion || '')}" placeholder="DescripciÃ³n opcional">
           <button type="button" class="btn btn--secondary" data-save-caption="${escapeAttribute(photo.id)}">Guardar</button>
           <button type="button" class="btn btn--danger" data-delete-photo="${escapeAttribute(photo.id)}">Borrar</button>
         </div>
@@ -227,7 +227,7 @@ function queueFiles(fileList) {
       continue;
     }
     if (file.size > MAX_IMAGE_SIZE) {
-      errors.push(`${file.name}: supera el máximo de 5 MB.`);
+      errors.push(`${file.name}: supera el mÃ¡ximo de 5 MB.`);
       continue;
     }
     pendingFiles.push({ file, preview: URL.createObjectURL(file), progress: 0 });
@@ -246,7 +246,7 @@ function renderPendingFiles() {
     <div class="lugar-pending__item">
       <img src="${escapeAttribute(entry.preview)}" alt="Vista previa de ${escapeAttribute(entry.file.name)}">
       <span class="lugar-pending__name" title="${escapeAttribute(entry.file.name)}">${escapeHtml(entry.file.name)}</span>
-      <button type="button" class="btn btn--secondary btn--sm" data-remove-pending="${index}" aria-label="Quitar ${escapeAttribute(entry.file.name)}">×</button>
+      <button type="button" class="btn btn--secondary btn--sm" data-remove-pending="${index}" aria-label="Quitar ${escapeAttribute(entry.file.name)}">Ã—</button>
       <progress class="lugar-progress" max="100" value="${entry.progress}" aria-label="Progreso de subida de ${escapeAttribute(entry.file.name)}"></progress>
     </div>
   `).join('');
@@ -350,7 +350,7 @@ async function uploadFile(path, file, onProgress) {
     const encodedPath = path.split('/').map(encodeURIComponent).join('/');
     request.open('POST', `${SUPABASE_URL}/storage/v1/object/${BUCKET}/${encodedPath}`);
     request.setRequestHeader('apikey', SUPABASE_ANON_KEY);
-    request.setRequestHeader('Authorization', `Bearer ${accessToken}`);
+    request.setRequestHeader('Authorization', 'Bearer ' + accessToken);
     request.setRequestHeader('Content-Type', file.type);
     request.setRequestHeader('x-upsert', 'false');
     request.upload.addEventListener('progress', event => {
@@ -386,16 +386,14 @@ async function uploadFile(path, file, onProgress) {
     });
     request.send(file);
   });
-}
-
-async function reloadPhotos() {
+}async function reloadPhotos() {
   const { data, error } = await supabase
     .from('lugar_fotos')
     .select('id, url, storage_path, descripcion, orden, created_at')
     .order('orden', { ascending: true })
     .order('created_at', { ascending: true });
   if (error) {
-    showToast(`Las fotos se guardaron, pero no se pudo actualizar la galería: ${error.message}`, 'error', 6000);
+    showToast(`Las fotos se guardaron, pero no se pudo actualizar la galerÃ­a: ${error.message}`, 'error', 6000);
     return;
   }
   photos = data || [];
@@ -407,7 +405,7 @@ async function saveAddress(event) {
   const input = document.getElementById('lugar-address-input');
   const address = input.value.trim();
   if (address.length > 500) {
-    showToast('La dirección no puede superar 500 caracteres.', 'error');
+    showToast('La direcciÃ³n no puede superar 500 caracteres.', 'error');
     return;
   }
   const button = event.currentTarget.querySelector('button[type="submit"]');
@@ -418,12 +416,12 @@ async function saveAddress(event) {
   );
   button.disabled = false;
   if (error) {
-    console.error('Error al guardar dirección:', error);
-    showToast(`No se pudo guardar la dirección: ${error.message}`, 'error', 6000);
+    console.error('Error al guardar direcciÃ³n:', error);
+    showToast(`No se pudo guardar la direcciÃ³n: ${error.message}`, 'error', 6000);
     return;
   }
   renderAddress(address, true);
-  showToast('Dirección guardada correctamente', 'success');
+  showToast('DirecciÃ³n guardada correctamente', 'success');
 }
 
 async function saveCaption(id) {
@@ -436,17 +434,17 @@ async function saveCaption(id) {
   button.disabled = false;
   if (error) {
     console.error('Error al guardar pie de foto:', error);
-    showToast(`No se pudo guardar la descripción: ${error.message}`, 'error', 6000);
+    showToast(`No se pudo guardar la descripciÃ³n: ${error.message}`, 'error', 6000);
     return;
   }
-  showToast('Descripción guardada', 'success');
+  showToast('DescripciÃ³n guardada', 'success');
   await reloadPhotos();
 }
 
 async function deletePhoto(id) {
   const photo = photos.find(item => String(item.id) === String(id));
   if (!photo) return;
-  const confirmed = await showConfirm('Borrar foto', 'Se eliminarán la foto y su registro. Esta acción no se puede deshacer.');
+  const confirmed = await showConfirm('Borrar foto', 'Se eliminarÃ¡n la foto y su registro. Esta acciÃ³n no se puede deshacer.');
   if (!confirmed) return;
 
   const { error: rowError } = await supabase.from('lugar_fotos').delete().eq('id', id);
@@ -458,7 +456,7 @@ async function deletePhoto(id) {
   const { error: fileError } = await supabase.storage.from(BUCKET).remove([photo.storage_path]);
   if (fileError) {
     console.error('Error al borrar archivo del bucket:', fileError);
-    showToast(`Se borró el registro, pero no el archivo del bucket: ${fileError.message}`, 'error', 7000);
+    showToast(`Se borrÃ³ el registro, pero no el archivo del bucket: ${fileError.message}`, 'error', 7000);
     await reloadPhotos();
     return;
   }
@@ -485,13 +483,13 @@ function renderLightbox() {
   overlay.setAttribute('aria-modal', 'true');
   overlay.setAttribute('aria-label', `Foto ${lightboxIndex + 1} de ${photos.length}`);
   overlay.innerHTML = `
-    <button type="button" class="lugar-lightbox__button" data-lightbox-prev aria-label="Foto anterior" ${photos.length < 2 ? 'disabled' : ''}>‹</button>
+    <button type="button" class="lugar-lightbox__button" data-lightbox-prev aria-label="Foto anterior" ${photos.length < 2 ? 'disabled' : ''}>â€¹</button>
     <figure class="lugar-lightbox__figure">
       <img class="lugar-lightbox__image" src="${escapeAttribute(photo.url)}" alt="${escapeAttribute(photo.descripcion || 'Foto del complejo Super Gol')}">
       ${photo.descripcion ? `<figcaption class="lugar-lightbox__caption">${escapeHtml(photo.descripcion)}</figcaption>` : `<figcaption class="lugar-lightbox__caption">${lightboxIndex + 1} / ${photos.length}</figcaption>`}
     </figure>
-    <button type="button" class="lugar-lightbox__button" data-lightbox-next aria-label="Foto siguiente" ${photos.length < 2 ? 'disabled' : ''}>›</button>
-    <button type="button" class="lugar-lightbox__button lugar-lightbox__close" data-lightbox-close aria-label="Cerrar visor">×</button>
+    <button type="button" class="lugar-lightbox__button" data-lightbox-next aria-label="Foto siguiente" ${photos.length < 2 ? 'disabled' : ''}>â€º</button>
+    <button type="button" class="lugar-lightbox__button lugar-lightbox__close" data-lightbox-close aria-label="Cerrar visor">Ã—</button>
   `;
   document.body.appendChild(overlay);
   overlay.addEventListener('click', event => {
@@ -531,3 +529,5 @@ function closeLightbox() {
   previousFocus?.focus();
   previousFocus = null;
 }
+
+
