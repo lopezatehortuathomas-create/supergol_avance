@@ -1,6 +1,6 @@
 import { supabase } from '../supabase.js';
 import { getCurrentUser } from '../auth.js';
-import { showToast, setLoading, getLocalDateString } from '../ui.js';
+import { showToast, setLoading, getLocalDateString, setupColombianPhoneInput, isValidColombianPhone } from '../ui.js';
 
 let spaces = [];
 
@@ -57,7 +57,7 @@ export function render() {
           </div>
           <div class="form-group">
             <label class="form-label" for="client-phone">Teléfono del cliente</label>
-            <input id="client-phone" class="form-input" type="tel" placeholder="300 000 0000" autocomplete="tel" required>
+            <input id="client-phone" class="form-input" type="tel" placeholder="3001234567" autocomplete="tel" required>
           </div>
         </div>
 
@@ -78,6 +78,7 @@ export async function init() {
   const todayValue = getLocalDateString();
   dateInput.min = todayValue;
   dateInput.value = todayValue;
+  setupColombianPhoneInput(document.getElementById('client-phone'));
 
   try {
     setLoading(true);
@@ -113,6 +114,10 @@ async function submitReservation(event) {
 
   if (!spaceId || !date || endTime.getHours() > 21 || !clientName || !clientPhone) {
     showToast('Completa los datos dentro del horario de atención', 'warning');
+    return;
+  }
+  if (!isValidColombianPhone(clientPhone)) {
+    showToast('El teléfono debe tener exactamente 10 dígitos.', 'error');
     return;
   }
   if (Number.isNaN(startTime.getTime()) || startTime <= new Date()) {

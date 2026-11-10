@@ -1,5 +1,5 @@
 import { signUp, getAuthErrorMessage } from '../auth.js';
-import { showToast, setLoading } from '../ui.js';
+import { showToast, setLoading, setupColombianPhoneInput, isValidColombianPhone } from '../ui.js';
 import { navigateTo } from '../router.js';
 
 export function render() {
@@ -18,7 +18,7 @@ export function render() {
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="phone">Teléfono</label>
-                        <input class="form-input" type="tel" id="phone" required placeholder="0987654321">
+                        <input class="form-input" type="tel" id="phone" required placeholder="3001234567">
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="email">Correo electrónico</label>
@@ -52,6 +52,7 @@ export function init() {
     const passwordInput = document.getElementById('password');
     const confirmPasswordInput = document.getElementById('confirm_password');
     const registerBtn = document.getElementById('register-btn');
+    setupColombianPhoneInput(phoneInput);
 
     if (form) {
         form.addEventListener('submit', async (e) => {
@@ -65,6 +66,11 @@ export function init() {
 
             if (!fullName || !phone || !email || !password || !confirmPassword) {
                 showToast('Por favor, completa todos los campos', 'error');
+                return;
+            }
+
+            if (!isValidColombianPhone(phone)) {
+                showToast('El teléfono debe tener exactamente 10 dígitos.', 'error');
                 return;
             }
 

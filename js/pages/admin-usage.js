@@ -1,6 +1,6 @@
 import { supabase } from '../supabase.js';
 import { getCurrentUser, isAdmin } from '../auth.js';
-import { showToast, showModal, showConfirm, setLoading, formatDate, formatCurrency, renderBadge, escapeHtml, closeModal } from '../ui.js';
+import { showToast, showModal, showConfirm, setLoading, formatDate, formatCurrency, renderBadge, escapeHtml, closeModal, setupColombianPhoneInput, isValidColombianPhone } from '../ui.js';
 import { navigateTo } from '../router.js';
 
 let spaces = [];
@@ -65,7 +65,7 @@ export function render() {
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label" for="usage-phone">Celular</label>
-                                    <input type="tel" id="usage-phone" class="form-input" placeholder="Número de contacto" required>
+                                    <input type="tel" id="usage-phone" class="form-input" placeholder="3001234567" required>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label" for="usage-duration">Duración (minutos)</label>
@@ -161,6 +161,7 @@ export async function init() {
         usageDateField.value = today;
         usageTimeField.value = '08:00';
         applyUsageDateBounds();
+        setupColombianPhoneInput(document.getElementById('usage-phone'));
 
         await loadSpaces();
         await loadStats();
@@ -214,6 +215,11 @@ async function handleUsageSubmit(e) {
     const duration = parseInt(document.getElementById('usage-duration').value, 10);
     const usageDateValue = document.getElementById('usage-date').value;
     const usageTimeValue = document.getElementById('usage-time').value;
+
+    if (!isValidColombianPhone(customerPhone)) {
+        showToast('El celular debe tener exactamente 10 dígitos.', 'error');
+        return;
+    }
 
     if (!usageDateValue || !usageTimeValue) {
         showToast('Selecciona la fecha y la hora de uso', 'error');

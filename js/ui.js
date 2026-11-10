@@ -125,6 +125,20 @@ export function setLoading(targetOrLoading, maybeTarget = null) {
   }
 }
 
+export function setupColombianPhoneInput(input) {
+  input.inputMode = 'numeric';
+  input.maxLength = 10;
+  input.pattern = '[0-9]{10}';
+  input.title = 'Ingresa exactamente 10 dígitos, sin espacios ni indicativo.';
+  input.addEventListener('input', () => {
+    input.value = input.value.replace(/[^0-9]/g, '').slice(0, 10);
+  });
+}
+
+export function isValidColombianPhone(phone) {
+  return /^[0-9]{10}$/.test(phone);
+}
+
 export function getLocalDateString(date = new Date()) {
   const localDate = new Date(date);
   const year = localDate.getFullYear();
