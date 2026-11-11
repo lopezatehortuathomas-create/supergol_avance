@@ -2,7 +2,7 @@ import { supabase } from '../supabase.js';
 import { getCurrentUser, isAdmin } from '../auth.js';
 import { showToast, showModal, showConfirm, setLoading, formatDate, formatCurrency, renderBadge, escapeHtml, closeModal, getLocalDateString, getLocalDateRange } from '../ui.js';
 import { navigateTo } from '../router.js';
-import { renderProductForm, getProductFormData, getProductImage, updateProductImagePreview } from '../components/product-form.js';
+import { renderProductForm, getProductFormData, getProductImage } from '../components/product-form.js';
 import { renderCartItem, renderCartSummary } from '../components/sale-form.js';
 
 let products = [];
@@ -177,8 +177,6 @@ export async function init() {
         document.getElementById('inventory-category-filter').addEventListener('change', renderInventoryGrid);
         document.addEventListener('click', handleInventoryActionClick);
         document.addEventListener('click', handleInventoryUtilityClick);
-        document.addEventListener('input', handleProductImagePreview);
-        document.addEventListener('change', handleProductImagePreview);
         document.addEventListener('click', handlePosProductAnimation);
         document.getElementById('history-date').addEventListener('change', loadSalesHistory);
 
@@ -331,12 +329,6 @@ function renderInventoryGrid() {
                 `;
             }).join('')}
     `;
-}
-
-function handleProductImagePreview(event) {
-    const form = event.target.closest('#product-form');
-    if (!form || !['product-name', 'product-category', 'product-image-file'].includes(event.target.id)) return;
-    updateProductImagePreview(form);
 }
 
 function handleInventoryUtilityClick(event) {

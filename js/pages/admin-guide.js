@@ -49,7 +49,7 @@ export function render() {
       <section class="manual-section">
         <div class="manual-section__title"><span>04</span><h2>Inventario y ventas</h2></div>
         <div class="manual-grid">
-          <article class="manual-card"><h3>Catálogo</h3><p>Busca por nombre y filtra por categoría. Al agregar o editar puedes definir nombre, categoría, precio, stock actual y mínimo. La imagen se sugiere según el producto; subir un archivo solo muestra una vista previa y no lo guarda. <strong>Eliminar</strong> desactiva el producto sin borrar sus ventas anteriores.</p></article>
+          <article class="manual-card"><h3>Catálogo</h3><p>Busca por nombre y filtra por categoría. Al agregar o editar puedes definir nombre, categoría, precio, stock actual y mínimo. El catálogo asigna automáticamente un icono según el producto y su categoría. <strong>Eliminar</strong> desactiva el producto sin borrar sus ventas anteriores.</p></article>
           <article class="manual-card"><h3>Punto de venta</h3><p>Abre la pestaña <strong>Punto de venta</strong>, selecciona productos para agregarlos al carrito, ajusta cantidades con +/− o quita un producto. <strong>Registrar Venta</strong> confirma el cobro y descuenta el stock. El resumen muestra productos, unidades e ingresos del día.</p></article>
           <article class="manual-card"><h3>Historial de ventas</h3><p>Selecciona una fecha para ver ventas, vendedor, productos y total del día. Usa <strong>Ver Detalle</strong> para consultar cantidades, precios unitarios y subtotales.</p></article>
           <article class="manual-card"><h3>Alerta de stock</h3><p>El aviso aparece cuando un producto llega al stock mínimo o queda por debajo. Actualiza el stock desde <strong>Editar</strong> después de reponerlo.</p></article>

@@ -1657,29 +1657,10 @@ body:has(.inventory-page)::before { opacity: 0.15; }
 .modal-content .table th:nth-child(n+2), .modal-content .table td:nth-child(n+2) { text-align: right; font-variant-numeric: tabular-nums; }
 .modal-content .table th:first-child, .modal-content .table td:first-child { text-align: left; }
 
-/* Product image form */
+/* Product form */
 .product-form { display: grid; gap: 0.5rem; }
 .product-form .form-group { margin-bottom: 0.5rem; }
 .product-form .form-input { width: 100%; }
-.product-form [type="file"] { padding: 0.55rem; }
-.product-form [type="file"]::file-selector-button {
-  margin-right: 0.65rem;
-  padding: 0.45rem 0.7rem;
-  border: 1px solid rgba(134, 239, 172, 0.32);
-  border-radius: 7px;
-  background: rgba(34, 197, 94, 0.14);
-  color: #dfffea;
-  cursor: pointer;
-}
-.product-image-field { min-width: 0; padding: 1rem; border: 1px solid rgba(134, 239, 172, 0.16); border-radius: 14px; background: rgba(5, 8, 5, 0.24); }
-.product-image-field legend { padding: 0 0.35rem; }
-.product-image-editor { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 1rem; align-items: center; }
-.product-image-preview-wrap { display: grid; aspect-ratio: 1; place-items: center; overflow: hidden; padding: 0.6rem; border: 1px solid rgba(134, 239, 172, 0.17); border-radius: 12px; background: rgba(5, 8, 5, 0.5); }
-.product-image-preview { width: 100%; height: 100%; object-fit: contain; }
-.product-image-fields { display: grid; gap: 0.45rem; }
-.product-image-fields .form-label { margin: 0; font-size: 0.76rem; }
-.product-image-status { margin: 0.1rem 0 0; color: #a8b9ad; font-size: 0.7rem; line-height: 1.4; }
-.product-image-status.is-error { color: #ffaaaa; }
 .product-form__actions { display: flex; justify-content: flex-end; }
 .product-form__actions .btn { min-height: 2.4rem; }
 .inventory-page .modal-overlay { padding: 1rem; }
@@ -1721,7 +1702,6 @@ body:has(.inventory-page)::before { opacity: 0.15; }
   .inventory-history-controls input { width: 100%; }
   .inventory-page .alert--warning { align-items: flex-start; flex-direction: column; }
   .inventory-low-stock-link { align-self: flex-start; }
-  .product-image-editor { grid-template-columns: 90px minmax(0, 1fr); gap: 0.7rem; }
   .inventory-page .modal-body, .inventory-page .modal-header { padding-inline: 1rem; }
   .inventory-page .modal-footer { padding-inline: 1rem; }
 }
