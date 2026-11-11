@@ -37,7 +37,7 @@ export function render() {
       <section class="manual-section">
         <div class="manual-section__title"><span>04</span><h2>Administrar tus reservas</h2></div>
         <div class="manual-actions">
-          <div><strong>Filtrar y consultar</strong><p>Entra en <strong>Mis Reservas</strong> y usa las pestañas para ver todas, pendientes, aprobadas o completadas. Los cambios de estado se reflejan en tu lista.</p></div>
+          <div><strong>Filtrar y consultar</strong><p>Entra en <strong>Mis Reservas</strong> y usa las pestañas para ver todas, pendientes, aprobadas o completadas. Si una solicitud sigue pendiente al finalizar el horario reservado, se cancelará automáticamente.</p></div>
           <div><strong>Actualizar una pendiente</strong><p>En una reserva pendiente puedes editar el día, la hora, la duración y las notas. El nuevo horario debe ser futuro y estar disponible.</p></div>
           <div><strong>Eliminar</strong><p>Puedes eliminar una solicitud pendiente o quitar una reserva completada de tu historial. Confirma la acción cuando se solicite; una reserva completada se elimina permanentemente del historial.</p></div>
         </div>

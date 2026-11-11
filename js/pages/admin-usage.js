@@ -235,7 +235,17 @@ async function handleUsageSubmit(e) {
         return;
     }
 
-    const usedAt = new Date(`${usageDateValue}T${usageTimeValue}:00`).toISOString();
+    const usageDateTime = new Date(`${usageDateValue}T${usageTimeValue}:00`);
+    if (Number.isNaN(usageDateTime.getTime())) {
+        showToast('La fecha y hora de uso no son válidas', 'error');
+        return;
+    }
+    if (usageDateTime > new Date()) {
+        showToast('No puedes registrar un uso antes de que llegue la hora seleccionada.', 'warning');
+        return;
+    }
+
+    const usedAt = usageDateTime.toISOString();
     const usageEnd = new Date(new Date(usedAt).getTime() + duration * 60_000).toISOString();
     const notes = document.getElementById('usage-notes').value;
 
