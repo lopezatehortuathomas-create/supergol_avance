@@ -4,7 +4,6 @@ import { showToast, showModal, showConfirm, setLoading, formatDate, formatCurren
 import { navigateTo } from '../router.js';
 
 let spaces = [];
-let todayReservations = [];
 
 const USAGE_TIME_START = 8;
 const USAGE_TIME_END = 20;
@@ -226,17 +225,36 @@ async function handleUsageSubmit(e) {
         return;
     }
 
+    if (!Number.isInteger(duration) || duration <= 0) {
+        showToast('La duración debe ser mayor a cero minutos', 'error');
+        return;
+    }
+
     if (!validateUsageTime(usageTimeValue)) {
         showToast('La hora debe estar entre las 08:00 y 20:00', 'error');
         return;
     }
 
     const usedAt = new Date(`${usageDateValue}T${usageTimeValue}:00`).toISOString();
+    const usageEnd = new Date(new Date(usedAt).getTime() + duration * 60_000).toISOString();
     const notes = document.getElementById('usage-notes').value;
 
     try {
         setLoading(true);
         const user = await getCurrentUser();
+
+        const { data: overlappingReservations, error: reservationError } = await supabase
+            .from('reservations')
+            .select('id')
+            .eq('space_id', spaceId)
+            .in('status', ['pendiente', 'aprobada'])
+            .lt('start_time', usageEnd)
+            .gt('end_time', usedAt);
+        if (reservationError) throw reservationError;
+        if (overlappingReservations?.length) {
+            showToast('Este espacio tiene una reserva activa en ese horario. Cancela la reserva antes de registrar el uso.', 'warning');
+            return;
+        }
         
         const { error } = await supabase.from('usage_logs').insert([{
             space_id: spaceId,
